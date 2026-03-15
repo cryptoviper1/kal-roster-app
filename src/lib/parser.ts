@@ -344,54 +344,65 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
 
   // 2. Add Calendar Events (RSV, STBY, TRG (PC/PT/GND))
   // Filter out days that already have flights to avoid duplicating SIM dates as both TRG and FLT
-  const flightDays = new Set(sortedFlights.map(f => f.stdUtc ? f.stdUtc.getDate() : -1));
+  const flightDays = new Set(sortedFlights.map(f => {
+    if (!f.stdUtc) return -1;
+    const kstDt = new Date(f.stdUtc.getTime() + 9 * 3600000);
+    return kstDt.getUTCDate();
+  }));
 
   for (const cev of calEvents) {
     const day = cev.day;
     if (flightDays.has(day) && !['RSV', 'STBY'].includes(cev.type)) continue;
 
-    // Create a target date using the baseDate year/month but replacing the day
-    const targetDate = new Date(baseDate);
-    targetDate.setDate(day);
-    targetDate.setHours(0, 0, 0, 0); // Start at midnight UTC naive
+    const kstBaseDate = new Date(baseDate.getTime() + 9 * 3600000);
+    const yyyy = kstBaseDate.getUTCFullYear();
+    const mm = kstBaseDate.getUTCMonth();
 
-    let startDt = new Date(targetDate);
-    let endDt = new Date(targetDate);
+    let startHour = 0; let startMin = 0;
+    let endHour = 0; let endMin = 0;
+
     let summary = "";
     let location = "ICN";
 
     if (cev.type === 'RSV') {
-      endDt.setHours(23, 59, 59);
+      startHour = 0; startMin = 0;
+      endHour = 23; endMin = 59;
       summary = "RESERVE";
     } else if (cev.type === 'STBY') {
       // Default 09:00 to 15:00 if no specific time matched
-      startDt.setHours(9, 0, 0);
-      endDt.setHours(15, 0, 0);
+      startHour = 9; startMin = 0;
+      endHour = 15; endMin = 0;
       const timeMatch = cev.text.match(/(\d{4})/);
       if (timeMatch) {
-        const hh = parseInt(timeMatch[1].substring(0, 2), 10);
-        const mm = parseInt(timeMatch[1].substring(2, 4), 10);
-        startDt.setHours(hh, mm, 0);
-        endDt = new Date(startDt.getTime() + 6 * 3600000); // 6 hours assumed
+        startHour = parseInt(timeMatch[1].substring(0, 2), 10);
+        startMin = parseInt(timeMatch[1].substring(2, 4), 10);
+        endHour = startHour + 6; // 6 hours assumed
+        endMin = startMin;
       }
       summary = "STANDBY";
     } else if (cev.type === 'TRG') {
       const [hh_s, mm_s] = cev.start.split(':').map(Number);
       const [hh_e, mm_e] = cev.end.split(':').map(Number);
-      startDt.setHours(hh_s, mm_s, 0);
-      endDt.setHours(hh_e, mm_e, 0);
-      if (endDt <= startDt) {
-        endDt.setDate(endDt.getDate() + 1);
-      }
+      startHour = hh_s; startMin = mm_s;
+      endHour = hh_e; endMin = mm_e;
       summary = `TRG: ${cev.subject}`;
     }
+
+    const startUtcTime = Date.UTC(yyyy, mm, day, startHour, startMin) - 9 * 3600000;
+    let endUtcTime = Date.UTC(yyyy, mm, day, endHour, endMin) - 9 * 3600000;
+    if (endUtcTime <= startUtcTime) {
+      endUtcTime += 24 * 3600000;
+    }
+
+    const startDt = new Date(startUtcTime);
+    const endDt = new Date(endUtcTime);
 
     payloadEvents.push({
       summary,
       description: `Schedule Type: ${cev.type} parsed from Calendar.`,
       location,
-      start: { dateTime: startDt.toISOString() },
-      end: { dateTime: endDt.toISOString() },
+      start: { dateTime: startDt.toISOString(), timeZone: 'Asia/Seoul' },
+      end: { dateTime: endDt.toISOString(), timeZone: 'Asia/Seoul' },
       type: cev.type
     });
   }
