@@ -41,14 +41,18 @@ export default async function DashboardPage() {
             <p className="subtitle" style={{ fontSize: '1rem' }}>{session.user.name}</p>
           </div>
         </div>
-        <form action={async () => {
-          "use server";
-          await signOut({ redirectTo: "/" });
-        }}>
-          <button type="submit" className="glass-button">
-            <LogOut size={18} /> Sign Out
-          </button>
-        </form>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <a href="/privacy" style={{ fontSize: '0.85rem', color: '#9ca3af', textDecoration: 'none' }} className="hover:text-white transition-colors">Privacy</a>
+          <a href="/terms" style={{ fontSize: '0.85rem', color: '#9ca3af', textDecoration: 'none' }} className="hover:text-white transition-colors">Terms</a>
+          <form action={async () => {
+            "use server";
+            await signOut({ redirectTo: "/" });
+          }}>
+            <button type="submit" className="glass-button">
+              <LogOut size={18} /> Sign Out
+            </button>
+          </form>
+        </div>
       </header>
 
       <DashboardClient initialData={initialRosterData} />
