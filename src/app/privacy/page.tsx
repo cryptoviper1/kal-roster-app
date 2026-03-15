@@ -1,8 +1,14 @@
 import React from 'react';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default function PrivacyPolicy() {
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <Link href="/dashboard" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-6 transition-colors" style={{ textDecoration: 'none' }}>
+        <ArrowLeft size={16} /> Back to Dashboard
+      </Link>
+      
       <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl mb-8">
         개인정보처리방침 (Privacy Policy)
       </h1>
