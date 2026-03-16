@@ -10,6 +10,9 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "KAL Roster Hub",
   description: "Korean Air Schedule to Google Calendar Sync",
+  verification: {
+    google: "oP3uTKB7PnW_DS5LLf9aaXX8DwSyQa-ah3H9hsSiynY",
+  },
 };
 
 export default function RootLayout({
