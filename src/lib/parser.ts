@@ -164,7 +164,7 @@ export function parseDetailedSchedule(text: string) {
           const isRank = ranks.includes(nextLine);
           const isDate = /^\d{4}-\d{2}-\d{2}/.test(nextLine);
           const isAirport = /^[A-Z]{3}$/.test(nextLine);
-          const isHeader = nextLine === 'Flight/Activity';
+          const isHeader = nextLine.startsWith('Flight/Activity');
 
           if (!isRank && !isHeader && !isFlightNum && !isAirport && !isDate) {
             comment = nextLine;
@@ -189,8 +189,19 @@ export function parseDetailedSchedule(text: string) {
   }
 
   return Object.values(flightsDict).sort((a: any, b: any) => {
+    // For sorting, if standard UTC parsing fails, fallback to string comparison
+    if (!a.stdUtc && !b.stdUtc) return a.stdStr.localeCompare(b.stdStr);
     if (!a.stdUtc) return -1;
     if (!b.stdUtc) return 1;
+    
+    // Convert both to their naive local timestamp value as parsed from the string
+    // This guarantees that flight order matches the explicit written date (e.g. 21st 04:34 vs 21st 09:16)
+    // circumventing timezone crossover bugs where a late time in UTC-8 drops a day earlier. 
+    const aLocalMs = new Date(a.stdStr.replace(' ', 'T')).getTime();
+    const bLocalMs = new Date(b.stdStr.replace(' ', 'T')).getTime();
+    
+    if (aLocalMs !== bLocalMs) return aLocalMs - bLocalMs;
+    
     return a.stdUtc.getTime() - b.stdUtc.getTime();
   });
 }
