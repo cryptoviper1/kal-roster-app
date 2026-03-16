@@ -9,7 +9,7 @@ export default function LoginPage() {
         <div className={styles.iconWrapper}>
           <PlaneTakeoff size={40} />
         </div>
-        <h1 className="title-gradient">KAL Roster</h1>
+        <h1 className="title-gradient">KAL FlightSchedule</h1>
         <p className="subtitle">
           Sync your Korean Air flight schedule to Google Calendar with one click.
         </p>
@@ -52,6 +52,12 @@ export default function LoginPage() {
             Get Started with Google
           </button>
         </form>
+        
+        <div style={{ marginTop: '24px', display: 'flex', gap: '16px', justifyContent: 'center', fontSize: '0.85rem' }}>
+          <a href="/privacy" style={{ color: '#9ca3af', textDecoration: 'underline' }}>Privacy Policy</a>
+          <span style={{ color: '#4b5563' }}>|</span>
+          <a href="/terms" style={{ color: '#9ca3af', textDecoration: 'underline' }}>Terms of Service</a>
+        </div>
       </div>
     </main>
   );
