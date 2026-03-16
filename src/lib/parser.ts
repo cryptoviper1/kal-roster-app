@@ -39,9 +39,54 @@ export function getUtcTime(dtStr: string, airportCode: string): Date | null {
   }
 }
 
+function normalizeDetailedText(text: string): string[] {
+  const parsedLines: string[] = [];
+  for (const line of text.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      
+      if (trimmed.includes('\t')) {
+          parsedLines.push(...trimmed.split('\t').map(x => x.trim()).filter(x => x));
+          continue;
+      }
+      
+      const fltMatch = trimmed.match(/^([A-Z0-9]{2,8})\s+([A-Z]{3})\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})\s+([A-Z]{3})\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})(?:\s+([A-Z0-9]{2,4}))?(?:\s+(.*))?$/);
+      if (fltMatch) {
+          parsedLines.push(fltMatch[1], fltMatch[2], fltMatch[3], fltMatch[4], fltMatch[5]);
+          if (fltMatch[6]) parsedLines.push(fltMatch[6]);
+          if (fltMatch[7]) {
+              const crewMatch = fltMatch[7].match(/^(CAP|FO|FS|CS|SS|PUR|INT|CC)\s+(?:([A-Z]+)\s+)?(?:([PF]\d)\s+)?([A-Z]?\d{6,7})\s+(.*)$/);
+              if (crewMatch) {
+                  parsedLines.push(crewMatch[1]);
+                  if (crewMatch[2]) parsedLines.push(crewMatch[2]);
+                  if (crewMatch[3]) parsedLines.push(crewMatch[3]);
+                  parsedLines.push(crewMatch[4]);
+                  parsedLines.push(crewMatch[5]);
+              } else {
+                  parsedLines.push(...fltMatch[7].split(/\s+/));
+              }
+          }
+          continue;
+      }
+      
+      const crewMatch = trimmed.match(/^(CAP|FO|FS|CS|SS|PUR|INT|CC)\s+(?:([A-Z]+)\s+)?(?:([PF]\d)\s+)?([A-Z]?\d{6,7})\s+(.*)$/);
+      if (crewMatch) {
+          parsedLines.push(crewMatch[1]);
+          if (crewMatch[2]) parsedLines.push(crewMatch[2]);
+          if (crewMatch[3]) parsedLines.push(crewMatch[3]);
+          parsedLines.push(crewMatch[4]);
+          parsedLines.push(crewMatch[5]);
+          continue;
+      }
+      
+      parsedLines.push(trimmed);
+  }
+  return parsedLines;
+}
+
 export function parseDetailedSchedule(text: string) {
   const flightsDict: Record<string, any> = {};
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  const lines = normalizeDetailedText(text);
 
   let currentKey = null;
   let i = 0;
