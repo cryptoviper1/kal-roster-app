@@ -107,7 +107,7 @@ export function parseDetailedSchedule(text: string) {
         const staUtc = getUtcTime(staStr, arr);
         let ac = "";
         let idx = i + 5;
-        const ranks = ['CAP', 'FO', 'FS', 'CS', 'SS', 'PUR', 'INT', 'CC'];
+        const ranks = ['CAP', 'FO', 'FS', 'CS', 'SS', 'PUR', 'INT', 'CC', 'FDT'];
 
         if (idx < lines.length && !ranks.includes(lines[idx])) {
           ac = lines[idx];
@@ -128,7 +128,7 @@ export function parseDetailedSchedule(text: string) {
     }
 
     if (currentKey) {
-      const ranks = ['CAP', 'FO', 'FS', 'CS', 'SS', 'PUR', 'INT', 'CC'];
+      const ranks = ['CAP', 'FO', 'FS', 'CS', 'SS', 'PUR', 'INT', 'CC', 'FDT'];
       if (ranks.includes(line)) {
         const rank = line;
         let idx = i + 1;
@@ -158,8 +158,9 @@ export function parseDetailedSchedule(text: string) {
         if (idx < lines.length) {
           const nextLine = lines[idx];
           // Determine if nextLine is actual data or a comment
-          // A flight number can be KE887, DH123, or training codes like 787FFS6, 787LOCAL
-          const isFlightNum = /^[A-Z0-9]{2,10}$/.test(nextLine);
+          // A flight number is typically KE887 or training codes like 787FFS6.
+          // Codes like 32SOE or 30MEARLY (starting with 2 digits or shorter) should be caught as comments.
+          const isFlightNum = /^[A-Z]{2}\d{1,4}[A-Z]?$/.test(nextLine) || /^\d{3}[A-Z]{2,}/.test(nextLine);
           const isRank = ranks.includes(nextLine);
           const isDate = /^\d{4}-\d{2}-\d{2}/.test(nextLine);
           const isAirport = /^[A-Z]{3}$/.test(nextLine);
