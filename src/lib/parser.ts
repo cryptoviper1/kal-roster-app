@@ -230,14 +230,26 @@ export function parseCalendarSchedule(text: string) {
           const endTime = match[3];
 
           if (!/^KE\d+/.test(subject) && !/^DH\d+/.test(subject)) {
-            events.push({
-              type: "TRG",
-              day: currentDay,
-              text: `${subject} ${startTime}~${endTime}`,
-              subject,
-              start: startTime,
-              end: endTime
-            });
+            // Check if this is actually a STBY event (e.g. HM_STBY)
+            if (subject.toUpperCase().includes('STBY')) {
+              events.push({
+                type: "STBY",
+                day: currentDay,
+                text: upperLine,
+                subject,
+                start: startTime,
+                end: endTime
+              });
+            } else {
+              events.push({
+                type: "TRG",
+                day: currentDay,
+                text: `${subject} ${startTime}~${endTime}`,
+                subject,
+                start: startTime,
+                end: endTime
+              });
+            }
           }
         }
       }
@@ -425,15 +437,23 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       endHour = 23; endMin = 59;
       summary = "RESERVE";
     } else if (cev.type === 'STBY') {
-      // Default 09:00 to 15:00 if no specific time matched
-      startHour = 9; startMin = 0;
-      endHour = 15; endMin = 0;
-      const timeMatch = cev.text.match(/(\d{4})/);
-      if (timeMatch) {
-        startHour = parseInt(timeMatch[1].substring(0, 2), 10);
-        startMin = parseInt(timeMatch[1].substring(2, 4), 10);
-        endHour = startHour + 6; // 6 hours assumed
-        endMin = startMin;
+      if (cev.start && cev.end) {
+        // Use actual parsed start/end times
+        const [hh_s, mm_s] = cev.start.split(':').map(Number);
+        const [hh_e, mm_e] = cev.end.split(':').map(Number);
+        startHour = hh_s; startMin = mm_s;
+        endHour = hh_e; endMin = mm_e;
+      } else {
+        // Default 09:00 to 15:00 if no specific time matched
+        startHour = 9; startMin = 0;
+        endHour = 15; endMin = 0;
+        const timeMatch = cev.text.match(/(\d{4})/);
+        if (timeMatch) {
+          startHour = parseInt(timeMatch[1].substring(0, 2), 10);
+          startMin = parseInt(timeMatch[1].substring(2, 4), 10);
+          endHour = startHour + 6;
+          endMin = startMin;
+        }
       }
       summary = "STANDBY";
     } else if (cev.type === 'TRG') {
@@ -453,9 +473,18 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     const startDt = new Date(startUtcTime);
     const endDt = new Date(endUtcTime);
 
+    // Build description with actual duty info for STBY
+    let eventDescription = `Schedule Type: ${cev.type} parsed from Calendar.`;
+    if (cev.type === 'STBY') {
+      const stbyLabel = cev.subject || 'STBY';
+      const startStr = `${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`;
+      const endStr = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+      eventDescription = `${stbyLabel} ${startStr} ~ ${endStr}`;
+    }
+
     payloadEvents.push({
       summary,
-      description: `Schedule Type: ${cev.type} parsed from Calendar.`,
+      description: eventDescription,
       location,
       start: { dateTime: startDt.toISOString(), timeZone: 'Asia/Seoul' },
       end: { dateTime: endDt.toISOString(), timeZone: 'Asia/Seoul' },
