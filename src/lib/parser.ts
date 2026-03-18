@@ -220,6 +220,8 @@ export function parseCalendarSchedule(text: string) {
       const upperLine = line.toUpperCase();
       if (upperLine.includes('RESERVE') || upperLine.includes('RSV')) {
         events.push({ type: "RSV", day: currentDay, text: "Reserve" });
+      } else if (upperLine.includes('MEDCHK') || upperLine.includes('MEDICAL')) {
+        events.push({ type: "MEDCHK", day: currentDay, text: "Medical Check" });
       } else if (upperLine.includes('STBY')) {
         events.push({ type: "STBY", day: currentDay, text: upperLine });
       } else {
@@ -421,7 +423,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
 
   for (const cev of calEvents) {
     const day = cev.day;
-    if (flightDays.has(day) && !['RSV', 'STBY'].includes(cev.type)) continue;
+    if (flightDays.has(day) && !['RSV', 'STBY', 'MEDCHK'].includes(cev.type)) continue;
 
     const kstBaseDate = new Date(baseDate.getTime() + 9 * 3600000);
     const yyyy = kstBaseDate.getUTCFullYear();
@@ -437,6 +439,10 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       startHour = 0; startMin = 0;
       endHour = 23; endMin = 59;
       summary = "RESERVE";
+    } else if (cev.type === 'MEDCHK') {
+      startHour = 0; startMin = 0;
+      endHour = 23; endMin = 59;
+      summary = "MEDICAL CHECK";
     } else if (cev.type === 'STBY') {
       if (cev.start && cev.end) {
         // Use actual parsed start/end times
