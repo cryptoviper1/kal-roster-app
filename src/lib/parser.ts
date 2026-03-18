@@ -259,7 +259,7 @@ export function parseCalendarSchedule(text: string) {
 }
 
 export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: boolean) {
-  let perDiemTotal = { usd: 0, eur: 0 };
+  let perDiemTotal = { usd: 0, eur: 0, krw: 0 };
   let flightsCount = 0;
   let totalFlightTimeMs = 0;
   
@@ -361,6 +361,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
                 if (isDom) {
                     const domPay = isCap ? 26000 : 20000;
                     memo.push(`Domestic Stay : ${formatDuration(stayDiffMs)} (Allowance : ${domPay.toLocaleString()} KRW)`);
+                    perDiemTotal.krw += domPay;
                 } else {
                     if (stayH < 4) {
                         const total_h = totalBlockSeconds / 3600;

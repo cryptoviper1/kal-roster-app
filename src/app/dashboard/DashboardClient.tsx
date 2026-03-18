@@ -15,8 +15,8 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
   const [selectedRank, setSelectedRank] = useState<'FO' | 'CAP'>('FO');
   const [stats, setStats] = useState({
     flights: 0,
-    perDiemFO: { usd: 0, eur: 0 },
-    perDiemCAP: { usd: 0, eur: 0 },
+    perDiemFO: { usd: 0, eur: 0, krw: 0 },
+    perDiemCAP: { usd: 0, eur: 0, krw: 0 },
     flightTimeMs: 0
   });
   const [previewEvents, setPreviewEvents] = useState<any[]>([]);
@@ -55,8 +55,8 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
       if (res.ok && data.success) {
         setStats({
           flights: data.flightsCount,
-          perDiemFO: data.perDiemFO || { usd: 0, eur: 0 },
-          perDiemCAP: data.perDiemCAP || { usd: 0, eur: 0 },
+          perDiemFO: data.perDiemFO || { usd: 0, eur: 0, krw: 0 },
+          perDiemCAP: data.perDiemCAP || { usd: 0, eur: 0, krw: 0 },
           flightTimeMs: data.totalFlightTimeMs || 0
         });
         setPreviewEvents(data.events || []);
@@ -196,7 +196,7 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
         </div>
         <AnimatePresence mode="wait">
           <motion.div 
-            key={`${selectedRank}-${selectedRank === 'FO' ? stats.perDiemFO.usd : stats.perDiemCAP.usd}-${selectedRank === 'FO' ? stats.perDiemFO.eur : stats.perDiemCAP.eur}`}
+            key={`${selectedRank}-${selectedRank === 'FO' ? stats.perDiemFO.usd : stats.perDiemCAP.usd}-${selectedRank === 'FO' ? stats.perDiemFO.eur : stats.perDiemCAP.eur}-${selectedRank === 'FO' ? stats.perDiemFO.krw : stats.perDiemCAP.krw}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className={styles.statsValue}
@@ -205,6 +205,9 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
             <div>${(selectedRank === 'FO' ? stats.perDiemFO.usd : stats.perDiemCAP.usd).toFixed(2)}</div>
             {(selectedRank === 'FO' ? stats.perDiemFO.eur : stats.perDiemCAP.eur) > 0 && (
               <div style={{ color: '#10b981' }}>€{(selectedRank === 'FO' ? stats.perDiemFO.eur : stats.perDiemCAP.eur).toFixed(2)}</div>
+            )}
+            {(selectedRank === 'FO' ? stats.perDiemFO.krw : stats.perDiemCAP.krw) > 0 && (
+              <div style={{ color: '#60a5fa' }}>₩{(selectedRank === 'FO' ? stats.perDiemFO.krw : stats.perDiemCAP.krw).toLocaleString()}</div>
             )}
           </motion.div>
         </AnimatePresence>
