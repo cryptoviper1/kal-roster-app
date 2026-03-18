@@ -158,9 +158,8 @@ export function parseDetailedSchedule(text: string) {
         if (idx < lines.length) {
           const nextLine = lines[idx];
           // Determine if nextLine is actual data or a comment
-          // A flight number is typically KE887 or DH123 (2 letters + numbers).
-          // Special codes like 787OE or 30MEARLY should NOT be caught by the flight pattern.
-          const isFlightNum = /^[A-Z]{2}\d{1,4}[A-Z]?$/.test(nextLine);
+          // A flight number can be KE887, DH123, or training codes like 787FFS6, 787LOCAL
+          const isFlightNum = /^[A-Z0-9]{2,10}$/.test(nextLine);
           const isRank = ranks.includes(nextLine);
           const isDate = /^\d{4}-\d{2}-\d{2}/.test(nextLine);
           const isAirport = /^[A-Z]{3}$/.test(nextLine);
@@ -294,7 +293,9 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     const fL = r[r.length - 1];
     flightsCount += r.length;
 
-    const isSim = SIM_KEYWORDS.some(k => f1.flt.toUpperCase().includes(k)) || (f1.dep === f1.arr);
+    const isSim = SIM_KEYWORDS.some(k => f1.flt.toUpperCase().includes(k)) || 
+                  (f1.dep === f1.arr) ||
+                  /^(78|77|74|73|38|35|33|32)/.test(f1.flt); // Matches training codes like 787FFS, 33FFS etc.
     let subject = isSim ? `${f1.flt}, ${f1.dep} ${f1.stdStr.substring(11)}~${fL.staStr.substring(11)}`
                         : `${f1.flt}, ${f1.dep} ${f1.stdStr.substring(11)} ${r.map((x: any)=>x.arr).join(',')} ${fL.staStr.substring(11)}`;
 
@@ -411,7 +412,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       location: `${f1.dep} -> ${fL.arr}`,
       start: { dateTime: startDtObj.toISOString() },
       end: { dateTime: endDtObj.toISOString() },
-      type: 'FLT'
+      type: isSim ? 'TRG' : 'FLT'
     });
   }
 
