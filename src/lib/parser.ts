@@ -222,6 +222,8 @@ export function parseCalendarSchedule(text: string) {
         events.push({ type: "RSV", day: currentDay, text: "Reserve" });
       } else if (upperLine.includes('MEDCHK') || upperLine.includes('MEDICAL')) {
         events.push({ type: "MEDCHK", day: currentDay, text: "Medical Check" });
+      } else if (upperLine === 'UNION') {
+        events.push({ type: "UNION", day: currentDay, text: "Union" });
       } else if (upperLine.includes('STBY')) {
         events.push({ type: "STBY", day: currentDay, text: upperLine });
       } else {
@@ -292,7 +294,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     const fL = r[r.length - 1];
     flightsCount += r.length;
 
-    const isSim = SIM_KEYWORDS.some(k => f1.flt.toUpperCase().includes(k));
+    const isSim = SIM_KEYWORDS.some(k => f1.flt.toUpperCase().includes(k)) || (f1.dep === f1.arr);
     let subject = isSim ? `${f1.flt}, ${f1.dep} ${f1.stdStr.substring(11)}~${fL.staStr.substring(11)}`
                         : `${f1.flt}, ${f1.dep} ${f1.stdStr.substring(11)} ${r.map((x: any)=>x.arr).join(',')} ${fL.staStr.substring(11)}`;
 
@@ -423,7 +425,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
 
   for (const cev of calEvents) {
     const day = cev.day;
-    if (flightDays.has(day) && !['RSV', 'STBY', 'MEDCHK'].includes(cev.type)) continue;
+    if (flightDays.has(day) && !['RSV', 'STBY', 'MEDCHK', 'UNION'].includes(cev.type)) continue;
 
     const kstBaseDate = new Date(baseDate.getTime() + 9 * 3600000);
     const yyyy = kstBaseDate.getUTCFullYear();
@@ -443,6 +445,10 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       startHour = 0; startMin = 0;
       endHour = 23; endMin = 59;
       summary = "MEDICAL CHECK";
+    } else if (cev.type === 'UNION') {
+      startHour = 0; startMin = 0;
+      endHour = 23; endMin = 59;
+      summary = "UNION";
     } else if (cev.type === 'STBY') {
       if (cev.start && cev.end) {
         // Use actual parsed start/end times

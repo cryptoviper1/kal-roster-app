@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calendar, DollarSign, UploadCloud, Plane, CheckCircle2, Eye, CalendarCheck, BookOpen, Clock, ShieldAlert, ExternalLink, Heart } from "lucide-react";
+import { Calendar, DollarSign, UploadCloud, Plane, CheckCircle2, Eye, CalendarCheck, BookOpen, Clock, ShieldAlert, ExternalLink, Heart, Users } from "lucide-react";
 import styles from "./page.module.css";
 import { motion, AnimatePresence } from "framer-motion";
 import BookmarkletGuide from "./BookmarkletGuide";
@@ -106,6 +106,7 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
       case 'RSV': return <ShieldAlert size={16} color="#f87171" />;
       case 'STBY': return <Clock size={16} color="#fbbf24" />;
       case 'MEDCHK': return <Heart size={16} color="#f472b6" />;
+      case 'UNION': return <Users size={16} color="#fb923c" />;
       default: return <Calendar size={16} color="#94a3b8" />;
     }
   };
@@ -117,6 +118,7 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
       case 'RSV': return '#fca5a5';
       case 'STBY': return '#fde047';
       case 'MEDCHK': return '#f9a8d4';
+      case 'UNION': return '#fdba74';
       default: return 'white';
     }
   };
