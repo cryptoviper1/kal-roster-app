@@ -1,0 +1,681 @@
+import { parseDetailedSchedule, parseCalendarSchedule, generateEvents } from './src/lib/parser';
+
+const text = `
+CHOI ONYU
+ID 2200940
+787 ICN FO
+
+
+MY DASHBOARD
+Pinned Tab
+My Schedule
+Remove Tab
+Crew Roster Report
+Remove Tab
+FLY HRS80:03
+TVL HRS00:00
+DUTY HRS108:13
+DO9
+RESERVE2
+
+
+CHOI ONYU
+ID
+2200940
+Feb 2026
+UTCSLTBLT
+Sunday
+Monday
+Tuesday
+Wednesday
+Thursday
+Friday
+Saturday
+01
+KE448HAN - ICN 05:11
+02
+DO
+03
+787UPRTICN 07:00 - ICN 14:00
+04
+KE041ICN 16:07 - SEA 09:10
+LOSEA
+05
+LOSEA
+KE042SEA 11:45 - ICN
+06
+KE042SEA - ICN 16:17
+07
+DO
+08
+DO
+09
+KE969ICN 11:03 - PRG 16:31
+LOPRG
+10
+LOPRG
+11
+LOPRG
+KE970PRG 18:19 - ICN
+12
+KE970PRG - ICN 13:20
+13
+ATDO
+14
+DO
+15
+DO
+16
+KE705ICN 19:15 - NRT 21:36
+LONRT
+17
+LONRT
+KE706NRT 09:29 - ICN 12:01
+18
+KE071ICN 18:46 - YVR 11:22
+LOYVR
+19
+LOYVR
+KE072YVR 13:20 - ICN
+20
+KE072YVR - ICN 17:52
+21
+DO
+22
+RESERVE
+23
+KE725ICN 15:16 - KIX 17:09
+KE726KIX 18:10 - ICN 20:23
+24
+RESERVE
+25
+ALM
+26
+ALM
+27
+DO
+28
+DO
+Flight (FLY)
+Flight (TVL)
+STBY/Reserve
+Training FLT
+Check FLT
+Layover
+Copyright © 2026 IBS Software Pvt. Ltd. All Rights Reserved.
+Push notifications cannot be established. Please contact system administrator.
+ 	
+CHOI ONYU  | 2200940  | 787  | FO
+
+FLY 80:03 TVL 00:00 DO 9 RESERVE 2
+
+Flight/Activity
+
+From
+
+STD
+
+To
+
+STA
+
+A/C
+
+Acting rank
+
+Duty
+
+PIC code
+
+Crew ID
+
+Name
+
+Comment
+
+Special Duty Code
+
+787UPRT
+
+ICN
+
+2026-02-03 07:00
+
+ICN
+
+2026-02-03 14:00
+
+CAP
+
+2000176
+
+JANG DONG WON
+
+787UT, 787CAT23, 787RNP
+
+FO
+
+2200940
+
+CHOI ONYU
+
+787UTBASE, 787UT, 787CAT23, 787RNP
+
+INT
+
+B181347
+
+PUTTKEMERY
+
+KE041
+
+ICN
+
+2026-02-04 16:07
+
+SEA
+
+2026-02-04 09:10
+
+781
+
+CAP
+
+FLY
+
+P1
+
+0702354
+
+KANG DONG CHEOL
+
+CAP
+
+FLY
+
+P2
+
+0702586
+
+NAM KISOO
+
+FDT
+
+FLY
+
+1204394
+
+CHOI JONGKI
+
+787OEOBS
+
+FO
+
+FLY
+
+F1
+
+1902891
+
+YOON JUNEHYUK
+
+FO
+
+FLY
+
+F2
+
+2200940
+
+CHOI ONYU
+
+KE042
+
+SEA
+
+2026-02-05 11:45
+
+ICN
+
+2026-02-06 16:17
+
+781
+
+CAP
+
+FLY
+
+P2
+
+0702354
+
+KANG DONG CHEOL
+
+CAP
+
+FLY
+
+P1
+
+0702586
+
+NAM KISOO
+
+FDT
+
+FLY
+
+1204394
+
+CHOI JONGKI
+
+787OEOBS
+
+FO
+
+FLY
+
+F2
+
+1902891
+
+YOON JUNEHYUK
+
+FO
+
+FLY
+
+F1
+
+2200940
+
+CHOI ONYU
+
+KE969
+
+ICN
+
+2026-02-09 11:03
+
+PRG
+
+2026-02-09 16:31
+
+78P
+
+CAP
+
+FLY
+
+P1
+
+1002890
+
+LEE DONGKI
+
+CAP
+
+FLY
+
+P2
+
+9800431
+
+JOO HYESONG
+
+FO
+
+FLY
+
+F2
+
+1501942
+
+LEE JUNGHOON
+
+FO
+
+FLY
+
+F1
+
+2200940
+
+CHOI ONYU
+
+KE970
+
+PRG
+
+2026-02-11 18:19
+
+ICN
+
+2026-02-12 13:20
+
+78P
+
+CAP
+
+FLY
+
+P2
+
+1002890
+
+LEE DONGKI
+
+CAP
+
+FLY
+
+P1
+
+9800431
+
+JOO HYESONG
+
+FO
+
+FLY
+
+F1
+
+1501942
+
+LEE JUNGHOON
+
+FO
+
+FLY
+
+F2
+
+2200940
+
+CHOI ONYU
+
+KE705
+
+ICN
+
+2026-02-16 19:15
+
+NRT
+
+2026-02-16 21:36
+
+78P
+
+CAP
+
+FLY
+
+P1
+
+0300134
+
+PARK KWANG TAE
+
+FO
+
+FLY
+
+F1
+
+2200940
+
+CHOI ONYU
+
+KE706
+
+NRT
+
+2026-02-17 09:29
+
+ICN
+
+2026-02-17 12:01
+
+78P
+
+CAP
+
+FLY
+
+P1
+
+0300134
+
+PARK KWANG TAE
+
+FO
+
+FLY
+
+F1
+
+2200940
+
+CHOI ONYU
+
+Flight/Activity
+
+From
+
+STD
+
+To
+
+STA
+
+A/C
+
+Acting rank
+
+Duty
+
+PIC code
+
+Crew ID
+
+Name
+
+Comment
+
+Special Duty Code
+
+KE071
+
+ICN
+
+2026-02-18 18:46
+
+YVR
+
+2026-02-18 11:22
+
+781
+
+CAP
+
+FLY
+
+P1
+
+0102421
+
+LEE KWANG JAE
+
+CAP
+
+FLY
+
+P2
+
+0600073
+
+KIM HYUN SIK
+
+FO
+
+FLY
+
+F2
+
+2100254
+
+SONG YOUNGGYU
+
+FO
+
+FLY
+
+F1
+
+2200940
+
+CHOI ONYU
+
+KE072
+
+YVR
+
+2026-02-19 13:20
+
+ICN
+
+2026-02-20 17:52
+
+781
+
+CAP
+
+FLY
+
+P2
+
+0102421
+
+LEE KWANG JAE
+
+CAP
+
+FLY
+
+P1
+
+0600073
+
+KIM HYUN SIK
+
+FO
+
+FLY
+
+F1
+
+2100254
+
+SONG YOUNGGYU
+
+FO
+
+FLY
+
+F2
+
+2200940
+
+CHOI ONYU
+
+CAP
+
+TVL
+
+0402894
+
+LEE SANGDAE
+
+CAP
+
+TVL
+
+2300410
+
+KIM MIN SIK
+
+FO
+
+TVL
+
+2201216
+
+JOO MINKWON
+
+KE725
+
+ICN
+
+2026-02-23 15:16
+
+KIX
+
+2026-02-23 17:09
+
+78E
+
+CAP
+
+FLY
+
+0600084
+
+PARK CHUNG HOON
+
+FO
+
+FLY
+
+2200940
+
+CHOI ONYU
+
+FLEET CHNG
+
+KE726
+
+KIX
+
+2026-02-23 18:10
+
+ICN
+
+2026-02-23 20:23
+
+78E
+
+CAP
+
+FLY
+
+0600084
+
+PARK CHUNG HOON
+
+FO
+
+FLY
+
+2200940
+
+CHOI ONYU
+
+FLEET CHNG
+`;
+
+const detailed = parseDetailedSchedule(text);
+console.log("Detailed Flights:");
+console.dir(detailed, { depth: null });
+console.log("\nCalendar Events:");
+console.dir(parseCalendarSchedule(text), { depth: null });

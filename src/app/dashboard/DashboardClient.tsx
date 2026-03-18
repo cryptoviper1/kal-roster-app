@@ -12,7 +12,13 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
   const [isParsing, setIsParsing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [stats, setStats] = useState({ flights: 0, perDiem: { usd: 0, eur: 0 }, flightTimeMs: 0 });
+  const [selectedRank, setSelectedRank] = useState<'FO' | 'CAP'>('FO');
+  const [stats, setStats] = useState({
+    flights: 0,
+    perDiemFO: { usd: 0, eur: 0 },
+    perDiemCAP: { usd: 0, eur: 0 },
+    flightTimeMs: 0
+  });
   const [previewEvents, setPreviewEvents] = useState<any[]>([]);
   const [expandedEvent, setExpandedEvent] = useState<number | null>(null);
 
@@ -41,8 +47,7 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           calendarText: cText, 
-          detailedText: dText,
-          rank: "FO"
+          detailedText: dText
         }),
       });
 
@@ -50,7 +55,8 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
       if (res.ok && data.success) {
         setStats({
           flights: data.flightsCount,
-          perDiem: data.perDiemTotal,
+          perDiemFO: data.perDiemFO || { usd: 0, eur: 0 },
+          perDiemCAP: data.perDiemCAP || { usd: 0, eur: 0 },
           flightTimeMs: data.totalFlightTimeMs || 0
         });
         setPreviewEvents(data.events || []);
@@ -147,19 +153,59 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
       </div>
       
       <div className={`glass-panel ${styles.card}`}>
-        <div className={styles.cardTitle}>
-          <DollarSign size={20} color="#4ade80" /> Est. Per Diem
+        <div className={styles.cardTitle} style={{ justifyContent: 'space-between', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <DollarSign size={20} color="#4ade80" /> Est. Per Diem
+          </div>
+          <div style={{ display: 'flex', gap: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '8px', padding: '3px' }}>
+            <button
+              onClick={() => setSelectedRank('FO')}
+              style={{
+                padding: '4px 12px',
+                borderRadius: '6px',
+                border: 'none',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                background: selectedRank === 'FO' ? 'rgba(74, 222, 128, 0.2)' : 'transparent',
+                color: selectedRank === 'FO' ? '#4ade80' : '#6b7280',
+                boxShadow: selectedRank === 'FO' ? '0 0 8px rgba(74, 222, 128, 0.15)' : 'none'
+              }}
+            >
+              F/O
+            </button>
+            <button
+              onClick={() => setSelectedRank('CAP')}
+              style={{
+                padding: '4px 12px',
+                borderRadius: '6px',
+                border: 'none',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                background: selectedRank === 'CAP' ? 'rgba(96, 165, 250, 0.2)' : 'transparent',
+                color: selectedRank === 'CAP' ? '#60a5fa' : '#6b7280',
+                boxShadow: selectedRank === 'CAP' ? '0 0 8px rgba(96, 165, 250, 0.15)' : 'none'
+              }}
+            >
+              CAPT
+            </button>
+          </div>
         </div>
         <AnimatePresence mode="wait">
           <motion.div 
-            key={`${stats.perDiem.usd}-${stats.perDiem.eur}`}
+            key={`${selectedRank}-${selectedRank === 'FO' ? stats.perDiemFO.usd : stats.perDiemCAP.usd}-${selectedRank === 'FO' ? stats.perDiemFO.eur : stats.perDiemCAP.eur}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className={styles.statsValue}
             style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}
           >
-            <div>${stats.perDiem.usd.toFixed(2)}</div>
-            {stats.perDiem.eur > 0 && <div style={{ color: '#10b981' }}>€{stats.perDiem.eur.toFixed(2)}</div>}
+            <div>${(selectedRank === 'FO' ? stats.perDiemFO.usd : stats.perDiemCAP.usd).toFixed(2)}</div>
+            {(selectedRank === 'FO' ? stats.perDiemFO.eur : stats.perDiemCAP.eur) > 0 && (
+              <div style={{ color: '#10b981' }}>€{(selectedRank === 'FO' ? stats.perDiemFO.eur : stats.perDiemCAP.eur).toFixed(2)}</div>
+            )}
           </motion.div>
         </AnimatePresence>
         <p className="subtitle" style={{ fontSize: '0.9rem' }}>Based on calculated layovers</p>

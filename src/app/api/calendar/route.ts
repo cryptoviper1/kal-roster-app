@@ -10,36 +10,24 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { detailedText, calendarText, rank } = await req.json();
-    const isCap = rank === 'CAP';
+    const { detailedText, calendarText } = await req.json();
 
     // 1. Parsing
     const sortedFlights = detailedText ? parseDetailedSchedule(detailedText) : [];
     const calEvents = calendarText ? parseCalendarSchedule(calendarText) : [];
 
-    // 2. Event Generation
-    const { events, perDiemTotal, flightsCount, totalFlightTimeMs } = generateEvents(sortedFlights, calEvents, isCap);
-
-    // 3. Calendar Sync Mode (using the user's accessToken if passed directly or via DB)
-    // Note: NextAuth v5 requires extending the session to retrieve the access_token.
-    // For demonstration, we will intercept the token in auth.ts callback or mock this step 
-    // if no token is available for this demo run.
-
-    // *Ideally*, we would do this here:
-    // const oauth2Client = new google.auth.OAuth2();
-    // oauth2Client.setCredentials({ access_token: session.accessToken });
-    // const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-    // for (const ev of events) {
-    //   await calendar.events.insert({ calendarId: 'primary', requestBody: ev });
-    // }
+    // 2. Event Generation — calculate for both ranks so client can toggle
+    const resultFO = generateEvents(sortedFlights, calEvents, false);
+    const resultCAP = generateEvents(sortedFlights, calEvents, true);
 
     return NextResponse.json({ 
       success: true, 
-      message: `Successfully parsed ${flightsCount} flights!`,
-      perDiemTotal,
-      flightsCount,
-      totalFlightTimeMs,
-      events // Added so the client can preview them
+      message: `Successfully parsed ${resultFO.flightsCount} flights!`,
+      perDiemFO: resultFO.perDiemTotal,
+      perDiemCAP: resultCAP.perDiemTotal,
+      flightsCount: resultFO.flightsCount,
+      totalFlightTimeMs: resultFO.totalFlightTimeMs,
+      events: resultFO.events
     });
   } catch (error) {
     console.error(error);
