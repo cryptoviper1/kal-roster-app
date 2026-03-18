@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calendar, DollarSign, UploadCloud, Plane, CheckCircle2, Eye, CalendarCheck, BookOpen, Clock, ShieldAlert, ExternalLink, Heart, Users } from "lucide-react";
+import { Calendar, DollarSign, UploadCloud, Plane, CheckCircle2, Eye, CalendarCheck, BookOpen, Clock, ShieldAlert, ExternalLink, Heart, Users, Trash2 } from "lucide-react";
 import styles from "./page.module.css";
 import { motion, AnimatePresence } from "framer-motion";
 import BookmarkletGuide from "./BookmarkletGuide";
@@ -245,18 +245,45 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
         </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-          <textarea 
-            placeholder="1. Crew Web Portal 에 접속 후, My Shedule 을 선택 후 모든 Text 를 긁어서 복사 한 후 붙여넣기 합니다." 
-            value={calText}
-            onChange={(e) => setCalText(e.target.value)}
-            style={{ width: '100%', height: '100px', padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
-          />
-          <textarea 
-            placeholder="2. My Shedule 화면에서 Crew Roster Report 를 선택 후 날짜 확인 후 Select Format 에서 Html 을 선택 후 Download 합니다. Download 이후에 나오는 모든 Text를 긁어서(모두 선택) 복사 하여 붙여넣기 합니다." 
-            value={detText}
-            onChange={(e) => setDetText(e.target.value)}
-            style={{ width: '100%', height: '150px', padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
-          />
+          <div style={{ position: 'relative' }}>
+            <textarea 
+              placeholder="1. Crew Web Portal 에 접속 후, My Shedule 을 선택 후 모든 Text 를 긁어서 복사 한 후 붙여넣기 합니다." 
+              value={calText}
+              onChange={(e) => setCalText(e.target.value)}
+              style={{ width: '100%', height: '100px', padding: '12px', paddingRight: '45px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+            />
+            {calText && (
+              <button 
+                onClick={() => setCalText("")}
+                style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94a3b8', padding: '6px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#ef4444'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#94a3b8'; }}
+                title="Clear content"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+          </div>
+
+          <div style={{ position: 'relative' }}>
+            <textarea 
+              placeholder="2. My Shedule 화면에서 Crew Roster Report 를 선택 후 날짜 확인 후 Select Format 에서 Html 을 선택 후 Download 합니다. Download 이후에 나오는 모든 Text를 긁어서(모두 선택) 복사 하여 붙여넣기 합니다." 
+              value={detText}
+              onChange={(e) => setDetText(e.target.value)}
+              style={{ width: '100%', height: '150px', padding: '12px', paddingRight: '45px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+            />
+            {detText && (
+              <button 
+                onClick={() => setDetText("")}
+                style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94a3b8', padding: '6px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#ef4444'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#94a3b8'; }}
+                title="Clear content"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+          </div>
 
           <button 
             onClick={handleParsePreview}
