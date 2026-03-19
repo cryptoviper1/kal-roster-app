@@ -216,7 +216,7 @@ export function parseCalendarSchedule(text: string) {
         events.push({ type: "MEDCHK", day: currentDay, text: "Medical Check" });
       } else if (upperLine === 'UNION') {
         events.push({ type: "UNION", day: currentDay, text: "Union" });
-      } else if (upperLine.includes('STBY')) {
+      } else if (upperLine.includes('SBY')) {
         events.push({ type: "STBY", day: currentDay, text: upperLine });
       } else {
         const match = line.match(/([A-Za-z0-9_]+)?[A-Z]{3}\s+(\d{2}:\d{2})\s*-\s*[A-Z]{3}\s+(\d{2}:\d{2})/);
@@ -227,7 +227,7 @@ export function parseCalendarSchedule(text: string) {
 
           if (!/^KE\d+/.test(subject) && !/^DH\d+/.test(subject)) {
             // Check if this is actually a STBY event (e.g. HM_STBY)
-            if (subject.toUpperCase().includes('STBY')) {
+            if (subject.toUpperCase().includes('SBY')) {
               events.push({
                 type: "STBY",
                 day: currentDay,
@@ -469,7 +469,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       const [hh_e, mm_e] = cev.end.split(':').map(Number);
       startHour = hh_s; startMin = mm_s;
       endHour = hh_e; endMin = mm_e;
-      summary = `TRG: ${cev.subject}`;
+      summary = cev.subject;
     }
 
     const startUtcTime = Date.UTC(yyyy, mm, day, startHour, startMin) - 9 * 3600000;
