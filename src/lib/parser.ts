@@ -152,7 +152,7 @@ export function parseDetailedSchedule(text: string) {
           // Determine if nextLine is actual data or a comment
           // A flight number is typically KE887 or training codes like 787FFS6.
           // Codes like 32SOE or 30MEARLY (starting with 2 digits or shorter) should be caught as comments.
-          const isFlightNum = /^[A-Z]{2}\d{1,4}[A-Z]?$/.test(nextLine) || /^\d{3}[A-Z]{2,}/.test(nextLine);
+          const isFlightNum = /^[A-Z]{2}\d{1,4}[A-Z]?$/.test(nextLine) || /^\d{3}[A-Z]{3,}/.test(nextLine);
           const isRank = ranks.includes(nextLine);
           const isDate = /^\d{4}-\d{2}-\d{2}/.test(nextLine);
           const isAirport = /^[A-Z]{3}$/.test(nextLine);
