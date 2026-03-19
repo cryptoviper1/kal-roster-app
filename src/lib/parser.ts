@@ -1,5 +1,5 @@
 import { AIRPORT_TZ, PER_DIEM_RATES, EURO_CITIES, KOREA_PORTS, SIM_KEYWORDS } from './constants';
-import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
+import { fromZonedTime } from 'date-fns-tz';
 
 export function getRateInfo(city: string) {
   let currency = "$";
@@ -24,16 +24,8 @@ export function formatDuration(ms: number) {
 export function getUtcTime(dtStr: string, airportCode: string): Date | null {
   try {
     const tz = AIRPORT_TZ[airportCode] || 'Asia/Seoul';
-    // date-fns-tz needs a specific format to parse correctly in a timezone if not ISO
-    // But standard JS can do it if formatted well:
-    // This is a naive way assuming dtStr is "YYYY-MM-DD HH:mm"
-    const [datePart, timePart] = dtStr.split(' ');
-    const isoString = `${datePart}T${timePart}:00`;
-    // We create a date in the given timezone, then convert to UTC
-    // A trick: Construct the string with offset
-    const d = new Date(new Date(isoString).toLocaleString('en-US', { timeZone: tz }));
-    const offsetCalc = new Date(isoString).getTime() - d.getTime();
-    return new Date(new Date(isoString).getTime() + offsetCalc);
+    const isoString = dtStr.replace(' ', 'T') + ':00';
+    return fromZonedTime(isoString, tz);
   } catch {
     return null;
   }
@@ -308,9 +300,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     let showUpDt = null;
     let startDtObj = f1.stdUtc ? f1.stdUtc : new Date(); 
     
-    if (f1.stdUtc) {
-      // V2 Python script calculates Show Up based on "kst" and offset
-      // Assuming offset is 1h 35m for ICN and 1h 40m for others based on start time
+    if (!isSim && f1.stdUtc) {
       const offsetMs = f1.dep === 'ICN' ? (95 * 60000) : (100 * 60000);
       showUpDt = new Date(f1.stdUtc.getTime() - offsetMs);
     }
@@ -419,11 +409,14 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
 
   // 2. Add Calendar Events (RSV, STBY, TRG (PC/PT/GND))
   // Filter out days that already have flights to avoid duplicating SIM dates as both TRG and FLT
-  const flightDays = new Set(sortedFlights.map(f => {
-    if (!f.stdUtc) return -1;
-    const kstDt = new Date(f.stdUtc.getTime() + 9 * 3600000);
-    return kstDt.getUTCDate();
-  }));
+  const flightDays = new Set(
+    sortedFlights
+      .filter((f: any) => f.stdUtc)
+      .map((f: any) => {
+        const kstDt = new Date(f.stdUtc.getTime() + 9 * 3600000);
+        return kstDt.getUTCDate();
+      })
+  );
 
   for (const cev of calEvents) {
     const day = cev.day;

@@ -27,6 +27,9 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
       setCalText(initialData.calendarText);
       setDetText(initialData.detailedText || "");
       
+      // Clear the cookie so it doesn't re-inject on refresh
+      document.cookie = 'rosterPayload=; Max-Age=0; path=/';
+      
       // Auto-parse if data exists from Bookmarklet
       handleParsePreviewDirect(initialData.calendarText, initialData.detailedText || "");
     }
