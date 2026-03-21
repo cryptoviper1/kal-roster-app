@@ -240,8 +240,9 @@ export function parseCalendarSchedule(text: string) {
                 end: endTime
               });
             } else {
+              const isGroundSchool = /^TSATC(CRM|GS|CT)$/.test(subject) || /^(78|32|77|33|38|74|22|35)?OEG(INT|EM|PM|CS)$/.test(subject) || /^OEGASS$/.test(subject);
               events.push({
-                type: "TRG",
+                type: isGroundSchool ? "GND" : "TRG",
                 day: currentDay,
                 text: `${subject} ${startTime}~${endTime}`,
                 subject,
@@ -447,7 +448,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       location: `${f1.dep} -> ${fL.arr}`,
       start: { dateTime: startDtObj.toISOString() },
       end: { dateTime: endDtObj.toISOString() },
-      type: isSim ? 'TRG' : 'FLT'
+      type: isGroundSchool ? 'GND' : (isSim ? 'TRG' : 'FLT')
     });
   }
 
@@ -508,7 +509,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
         }
       }
       summary = "STANDBY";
-    } else if (cev.type === 'TRG') {
+    } else if (cev.type === 'TRG' || cev.type === 'GND') {
       const [hh_s, mm_s] = cev.start.split(':').map(Number);
       const [hh_e, mm_e] = cev.end.split(':').map(Number);
       startHour = hh_s; startMin = mm_s;
