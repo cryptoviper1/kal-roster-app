@@ -1,4 +1,4 @@
-import { AIRPORT_TZ, PER_DIEM_RATES, EURO_CITIES, KOREA_PORTS, SIM_KEYWORDS } from './constants';
+import { AIRPORT_TZ, PER_DIEM_RATES, EURO_CITIES, KOREA_PORTS, SIM_KEYWORDS, HOTELS } from './constants';
 import { fromZonedTime } from 'date-fns-tz';
 
 export function getRateInfo(city: string) {
@@ -379,6 +379,9 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
                 if (isDom) {
                     const domPay = isCap ? 26000 : 20000;
                     memo.push(`🏨 Domestic Stay : ${formatDuration(stayDiffMs)} (Allowance : ${domPay.toLocaleString()} KRW)`);
+                    if (HOTELS[f.arr]) {
+                        memo.push(`🛌 Stay Hotel : ${HOTELS[f.arr]}`);
+                    }
                     perDiemTotal.krw += domPay;
                 } else {
                     if (stayH < 4) {
@@ -394,8 +397,12 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
                         const { rate, currency } = getRateInfo(f.arr);
                         const pdVal = stayH * rate;
                         memo.push(`🏨 Stay Hours : ${formatDuration(stayDiffMs)} (Per Diem : ${pdVal.toFixed(2)} ${currency})`);
+                        if (HOTELS[f.arr]) {
+                            memo.push(`🛌 Stay Hotel : ${HOTELS[f.arr]}`);
+                        }
                         if (currency === "€") {
                             perDiemTotal.eur += pdVal;
+
                         } else {
                             perDiemTotal.usd += pdVal;
                         }
