@@ -346,8 +346,10 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
         const stdUtcStr = f.stdUtc ? f.stdUtc.toISOString().substring(11, 16) : "?";
         const staUtcStr = f.staUtc ? f.staUtc.toISOString().substring(11, 16) : "?";
         
-        memo.push(`출발 ${f.stdStr} (UTC ${stdUtcStr})`);
-        memo.push(`도착 ${f.staStr} (UTC ${staUtcStr})`);
+        const startLabel = isSim ? "훈련 시작" : "출발";
+        const endLabel = isSim ? "훈련 종료" : "도착";
+        memo.push(`${startLabel} ${f.stdStr} (UTC ${stdUtcStr})`);
+        memo.push(`${endLabel} ${f.staStr} (UTC ${staUtcStr})`);
         if (isSim) {
             memo.push(`Sim Time : ${blkDur}`);
         } else {
