@@ -345,8 +345,14 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
             memo.push(`-> ${f.staStr} (UTC ${staUtcStr})`);
         }
         memo.push(`Block Time : ${blkDur}`);
+        memo.push("");
 
-        // Per diem calculation matches python logic exactly
+        memo.push(`★ ${f.flt} Crew ★`);
+        if (f.crews) {
+            memo.push(...f.crews);
+        }
+
+        // Per diem calculation moved here (between flights)
         if (i < r.length - 1) {
             const next_f = r[i+1];
             if (next_f.stdUtc && f.staUtc) {
@@ -354,9 +360,10 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
                 const stayH = stayDiffMs / 3600000;
                 const isDom = KOREA_PORTS.includes(f.dep) && KOREA_PORTS.includes(f.arr);
                 
+                memo.push(""); // Add a blank line for visibility
                 if (isDom) {
                     const domPay = isCap ? 26000 : 20000;
-                    memo.push(`Domestic Stay : ${formatDuration(stayDiffMs)} (Allowance : ${domPay.toLocaleString()} KRW)`);
+                    memo.push(`🏨 Domestic Stay : ${formatDuration(stayDiffMs)} (Allowance : ${domPay.toLocaleString()} KRW)`);
                     perDiemTotal.krw += domPay;
                 } else {
                     if (stayH < 4) {
@@ -366,12 +373,12 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
                         else if (isCap) pdVal = 50;
                         else if (total_h >= 5) pdVal = 41;
                         
-                        memo.push(`Quick Turn (Per Diem : $${pdVal.toFixed(2)})`);
+                        memo.push(`⏱️ Quick Turn (Per Diem : $${pdVal.toFixed(2)})`);
                         perDiemTotal.usd += pdVal;
                     } else {
                         const { rate, currency } = getRateInfo(f.arr);
                         const pdVal = stayH * rate;
-                        memo.push(`Stay Hours : ${formatDuration(stayDiffMs)} (Per Diem : ${pdVal.toFixed(2)} ${currency})`);
+                        memo.push(`🏨 Stay Hours : ${formatDuration(stayDiffMs)} (Per Diem : ${pdVal.toFixed(2)} ${currency})`);
                         if (currency === "€") {
                             perDiemTotal.eur += pdVal;
                         } else {
@@ -380,11 +387,6 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
                     }
                 }
             }
-        }
-
-        memo.push(`★ ${f.flt} Crew ★`);
-        if (f.crews) {
-            memo.push(...f.crews);
         }
         memo.push("");
     }
@@ -490,14 +492,25 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       eventDescription = `${stbyLabel} ${startStr} ~ ${endStr}`;
     }
 
-    payloadEvents.push({
+    const eventPayload: any = {
       summary,
       description: eventDescription,
       location,
-      start: { dateTime: startDt.toISOString(), timeZone: 'Asia/Seoul' },
-      end: { dateTime: endDt.toISOString(), timeZone: 'Asia/Seoul' },
       type: cev.type
-    });
+    };
+
+    if (cev.type === 'RSV') {
+      const startDateStr = `${yyyy}-${(mm + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      const nextDayObj = new Date(Date.UTC(yyyy, mm, day + 1));
+      const endDateStr = nextDayObj.toISOString().split('T')[0];
+      eventPayload.start = { date: startDateStr };
+      eventPayload.end = { date: endDateStr };
+    } else {
+      eventPayload.start = { dateTime: startDt.toISOString(), timeZone: 'Asia/Seoul' };
+      eventPayload.end = { dateTime: endDt.toISOString(), timeZone: 'Asia/Seoul' };
+    }
+
+    payloadEvents.push(eventPayload);
   }
 
   // Sort payload by start date
