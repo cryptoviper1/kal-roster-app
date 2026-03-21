@@ -289,10 +289,11 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     const fL = r[r.length - 1];
     flightsCount += r.length;
 
-    const isSim = SIM_KEYWORDS.some(k => f1.flt.toUpperCase().includes(k)) || 
+    const isGroundSchool = /^TSATC(CRM|GS|CT)$/.test(f1.flt) || /^(78|32|77|33|38|74|22|35)?OEG(INT|EM|PM|CS)$/.test(f1.flt) || /^OEGASS$/.test(f1.flt);
+    const isSim = !isGroundSchool && (SIM_KEYWORDS.some(k => f1.flt.toUpperCase().includes(k)) || 
                   (f1.dep === f1.arr) ||
-                  /^(78|77|74|73|38|35|33|32)/.test(f1.flt); // Matches training codes like 787FFS, 33FFS etc.
-    let subject = isSim ? `${f1.flt}, ${f1.dep} ${f1.stdStr.substring(11)}~${fL.staStr.substring(11)}`
+                  /^(78|77|74|73|38|35|33|32)/.test(f1.flt)); // Matches training codes like 787FFS, 33FFS etc.
+    let subject = (isSim || isGroundSchool) ? `${f1.flt}, ${f1.dep} ${f1.stdStr.substring(11)}~${fL.staStr.substring(11)}`
                         : `${f1.flt}, ${f1.dep} ${f1.stdStr.substring(11)} ${r.map((x: any)=>x.arr).join(',')} ${fL.staStr.substring(11)}`;
 
     // -----------------------------------------------------------------
@@ -319,7 +320,14 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
         const f = r[i];
         
         const displayFlt = f.flt.replace(/^([A-Z]{2,3})(\d+)/, '$1 $2');
-        let header = isSim ? `${displayFlt} 🏢 Simulator: ${f.dep} 🏢` : `${displayFlt} ✈️ ${f.dep}-${f.arr} ✈️`;
+        let header = "";
+        if (isGroundSchool) {
+            header = `${displayFlt} 📚 Ground School: ${f.dep} 📚`;
+        } else if (isSim) {
+            header = `${displayFlt} 🏢 Simulator: ${f.dep} 🏢`;
+        } else {
+            header = `${displayFlt} ✈️ ${f.dep}-${f.arr} ✈️`;
+        }
         if (f.ac) {
             header += ` (A/C: ${f.ac})`;
         }
@@ -346,11 +354,13 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
         const stdUtcStr = f.stdUtc ? f.stdUtc.toISOString().substring(11, 16) : "?";
         const staUtcStr = f.staUtc ? f.staUtc.toISOString().substring(11, 16) : "?";
         
-        const startLabel = isSim ? "훈련 시작" : "출발";
-        const endLabel = isSim ? "훈련 종료" : "도착";
+        const startLabel = isGroundSchool ? "수업 시작" : (isSim ? "훈련 시작" : "출발");
+        const endLabel = isGroundSchool ? "수업 종료" : (isSim ? "훈련 종료" : "도착");
         memo.push(`${startLabel} ${f.stdStr} (UTC ${stdUtcStr})`);
         memo.push(`${endLabel} ${f.staStr} (UTC ${staUtcStr})`);
-        if (isSim) {
+        if (isGroundSchool) {
+            memo.push(`Class Time : ${blkDur}`);
+        } else if (isSim) {
             const timeOnly = f.stdStr.substring(11, 16);
             const simSessions: Record<string, string> = {
                 "07:00": "08:30~12:30",
@@ -370,11 +380,8 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
 
         memo.push("");
 
-        if (isSim) {
-            memo.push(`★ ${f.flt} Simulator Crew ★`);
-        } else {
-            memo.push(`★ ${f.flt} Crew ★`);
-        }
+        const label = isGroundSchool ? `Class Members` : (isSim ? `Simulator Crew` : `Crew`);
+        memo.push(`★ ${f.flt} ${label} ★`);
 
         if (f.crews) {
             memo.push(...f.crews);
