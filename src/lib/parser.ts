@@ -514,7 +514,11 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
   }
 
   // Sort payload by start date
-  payloadEvents.sort((a, b) => new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime());
+  payloadEvents.sort((a, b) => {
+    const timeA = new Date(a.start.dateTime || a.start.date).getTime();
+    const timeB = new Date(b.start.dateTime || b.start.date).getTime();
+    return timeA - timeB;
+  });
 
   return { events: payloadEvents, perDiemTotal, flightsCount, totalFlightTimeMs };
 }
