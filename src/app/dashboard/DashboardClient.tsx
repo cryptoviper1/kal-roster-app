@@ -345,10 +345,16 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
 
             <div style={{ maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '8px' }}>
               {previewEvents.map((ev, idx) => {
-                const start = new Date(ev.start.dateTime);
-                const end = new Date(ev.end.dateTime);
+                const start = new Date(ev.start.dateTime || ev.start.date);
+                const end = new Date(ev.end.dateTime || ev.end.date);
                 const dateStr = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                const timeStr = `${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                
+                let timeStr = "";
+                if (ev.start.date) {
+                  timeStr = "All Day";
+                } else {
+                  timeStr = `${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                }
                 
                 return (
                   <div 
