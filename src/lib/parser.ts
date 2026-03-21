@@ -373,7 +373,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
                         else if (isCap) pdVal = 50;
                         else if (total_h >= 5) pdVal = 41;
                         
-                        memo.push(`⏱️ Quick Turn (Per Diem : $${pdVal.toFixed(2)})`);
+                        memo.push(`⏱️ Quick Turn : ${formatDuration(stayDiffMs)} (Per Diem : $${pdVal.toFixed(2)})`);
                         perDiemTotal.usd += pdVal;
                     } else {
                         const { rate, currency } = getRateInfo(f.arr);
