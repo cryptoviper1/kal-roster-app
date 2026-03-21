@@ -318,12 +318,12 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     for (let i = 0; i < r.length; i++) {
         const f = r[i];
         
-        if (isSim) {
-            memo.push(`🏢 Simulator: ${f.dep} 🏢`);
-        } else {
-            memo.push(`✈️ ${f.dep}-${f.arr} ✈️`);
+        const displayFlt = f.flt.replace(/^([A-Z]{2,3})(\d+)/, '$1 $2');
+        let header = isSim ? `${displayFlt} 🏢 Simulator: ${f.dep} 🏢` : `${displayFlt} ✈️ ${f.dep}-${f.arr} ✈️`;
+        if (f.ac) {
+            header += ` (A/C: ${f.ac})`;
         }
-
+        memo.push(header);
 
         if (i === 0 && !isSim && showUpDt) {
             // Need a naive KST format since Python used KST string: YYYY-MM-DD HH:MM
@@ -346,12 +346,8 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
         const stdUtcStr = f.stdUtc ? f.stdUtc.toISOString().substring(11, 16) : "?";
         const staUtcStr = f.staUtc ? f.staUtc.toISOString().substring(11, 16) : "?";
         
-        memo.push(`${f.flt}: ${f.stdStr} (UTC ${stdUtcStr})`);
-        if (f.ac) {
-            memo.push(`-> ${f.staStr} (UTC ${staUtcStr}) (A/C: ${f.ac})`);
-        } else {
-            memo.push(`-> ${f.staStr} (UTC ${staUtcStr})`);
-        }
+        memo.push(`출발 ${f.stdStr} (UTC ${stdUtcStr})`);
+        memo.push(`도착 ${f.staStr} (UTC ${staUtcStr})`);
         if (isSim) {
             memo.push(`Sim Time : ${blkDur}`);
         } else {
