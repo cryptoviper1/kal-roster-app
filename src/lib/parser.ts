@@ -315,7 +315,12 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     for (let i = 0; i < r.length; i++) {
         const f = r[i];
         
-        memo.push(`✈️ ${f.dep}-${f.arr} ✈️`);
+        if (isSim) {
+            memo.push(`🏢 Simulator: ${f.dep} 🏢`);
+        } else {
+            memo.push(`✈️ ${f.dep}-${f.arr} ✈️`);
+        }
+
 
         if (i === 0 && !isSim && showUpDt) {
             // Need a naive KST format since Python used KST string: YYYY-MM-DD HH:MM
@@ -344,10 +349,20 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
         } else {
             memo.push(`-> ${f.staStr} (UTC ${staUtcStr})`);
         }
-        memo.push(`Block Time : ${blkDur}`);
+        if (isSim) {
+            memo.push(`Sim Time : ${blkDur}`);
+        } else {
+            memo.push(`Block Time : ${blkDur}`);
+        }
+
         memo.push("");
 
-        memo.push(`★ ${f.flt} Crew ★`);
+        if (isSim) {
+            memo.push(`★ ${f.flt} Simulator Crew ★`);
+        } else {
+            memo.push(`★ ${f.flt} Crew ★`);
+        }
+
         if (f.crews) {
             memo.push(...f.crews);
         }
