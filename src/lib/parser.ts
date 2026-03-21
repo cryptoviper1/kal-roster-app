@@ -351,7 +351,19 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
         memo.push(`${startLabel} ${f.stdStr} (UTC ${stdUtcStr})`);
         memo.push(`${endLabel} ${f.staStr} (UTC ${staUtcStr})`);
         if (isSim) {
-            memo.push(`Sim Time : ${blkDur}`);
+            const timeOnly = f.stdStr.substring(11, 16);
+            const simSessions: Record<string, string> = {
+                "07:00": "08:30~12:30",
+                "11:00": "12:30~16:30",
+                "15:50": "17:30~21:30",
+                "20:30": "21:30~01:30",
+                "00:30": "01:30~05:30"
+            };
+            if (simSessions[timeOnly]) {
+                memo.push(`FFS TRNG ${simSessions[timeOnly]}`);
+            } else {
+                memo.push(`Sim Time : ${blkDur}`);
+            }
         } else {
             memo.push(`Block Time : ${blkDur}`);
         }
