@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { google } from "googleapis";
 import { parseDetailedSchedule, parseCalendarSchedule, generateEvents } from "@/lib/parser";
 
 export async function POST(req: Request) {

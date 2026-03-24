@@ -10,13 +10,15 @@ export async function POST(req: Request) {
       const cookieStore = await cookies();
       cookieStore.set("rosterPayload", encodeURIComponent(rosterData), {
         path: "/",
-        maxAge: 60, // Only keep it for 60 seconds (enough time to redirect and read)
+        maxAge: 60,
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
       });
     }
 
     return NextResponse.redirect(new URL("/dashboard", req.url));
-  } catch (err) {
+  } catch {
     return NextResponse.redirect(new URL("/dashboard?error=upload_failed", req.url));
   }
 }
