@@ -1,4 +1,4 @@
-import { AIRPORT_TZ, PER_DIEM_RATES, EURO_CITIES, KOREA_PORTS, SIM_KEYWORDS } from './constants';
+import { AIRPORT_TZ, PER_DIEM_RATES, EURO_CITIES, KOREA_PORTS, SIM_KEYWORDS, HOTELS } from './constants';
 import { fromZonedTime } from 'date-fns-tz';
 
 export function getRateInfo(city: string) {
@@ -152,7 +152,10 @@ export function parseDetailedSchedule(text: string) {
           // Determine if nextLine is actual data or a comment
           // A flight number is typically KE887 or training codes like 787FFS6.
           // Codes like 32SOE or 30MEARLY (starting with 2 digits or shorter) should be caught as comments.
-          const isFlightNum = /^[A-Z]{2}\d{1,4}[A-Z]?$/.test(nextLine) || /^\d{3}[A-Z]{3,}/.test(nextLine);
+          const isFlightNum = (/^[A-Z]{2}\d{1,4}[A-Z]?$/.test(nextLine) || /^\d{3}[A-Z]{3,}/.test(nextLine)) ||
+                              (/^[A-Z0-9]{2,8}$/.test(nextLine) && 
+                               (idx + 2 < lines.length) && 
+                               /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(lines[idx+2]));
           const isRank = ranks.includes(nextLine);
           const isDate = /^\d{4}-\d{2}-\d{2}/.test(nextLine);
           const isAirport = /^[A-Z]{3}$/.test(nextLine);
@@ -237,8 +240,9 @@ export function parseCalendarSchedule(text: string) {
                 end: endTime
               });
             } else {
+              const isGroundSchool = /^TSATC(CRM|GS|CT)$/.test(subject) || /^(78|32|77|33|38|74|22|35)?OEG(INT|EM|PM|CS)$/.test(subject) || /^OEGASS$/.test(subject);
               events.push({
-                type: "TRG",
+                type: isGroundSchool ? "GND" : "TRG",
                 day: currentDay,
                 text: `${subject} ${startTime}~${endTime}`,
                 subject,
@@ -286,10 +290,11 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     const fL = r[r.length - 1];
     flightsCount += r.length;
 
-    const isSim = SIM_KEYWORDS.some(k => f1.flt.toUpperCase().includes(k)) || 
+    const isGroundSchool = /^TSATC(CRM|GS|CT)$/.test(f1.flt) || /^(78|32|77|33|38|74|22|35)?OEG(INT|EM|PM|CS)$/.test(f1.flt) || /^OEGASS$/.test(f1.flt);
+    const isSim = !isGroundSchool && (SIM_KEYWORDS.some(k => f1.flt.toUpperCase().includes(k)) || 
                   (f1.dep === f1.arr) ||
-                  /^(78|77|74|73|38|35|33|32)/.test(f1.flt); // Matches training codes like 787FFS, 33FFS etc.
-    let subject = isSim ? `${f1.flt}, ${f1.dep} ${f1.stdStr.substring(11)}~${fL.staStr.substring(11)}`
+                  /^(78|77|74|73|38|35|33|32)/.test(f1.flt)); // Matches training codes like 787FFS, 33FFS etc.
+    let subject = (isSim || isGroundSchool) ? `${f1.flt}, ${f1.dep} ${f1.stdStr.substring(11)}~${fL.staStr.substring(11)}`
                         : `${f1.flt}, ${f1.dep} ${f1.stdStr.substring(11)} ${r.map((x: any)=>x.arr).join(',')} ${fL.staStr.substring(11)}`;
 
     // -----------------------------------------------------------------
@@ -315,7 +320,19 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     for (let i = 0; i < r.length; i++) {
         const f = r[i];
         
-        memo.push(`✈️ ${f.dep}-${f.arr} ✈️`);
+        const displayFlt = f.flt.replace(/^([A-Z]{2,3})(\d+)/, '$1 $2');
+        let header = "";
+        if (isGroundSchool) {
+            header = `${displayFlt} 📚 Ground School: ${f.dep} 📚`;
+        } else if (isSim) {
+            header = `${displayFlt} 🏢 Simulator: ${f.dep} 🏢`;
+        } else {
+            header = `${displayFlt} ✈️ ${f.dep}-${f.arr} ✈️`;
+        }
+        if (f.ac) {
+            header += ` (A/C: ${f.ac})`;
+        }
+        memo.push(header);
 
         if (i === 0 && !isSim && showUpDt) {
             // Need a naive KST format since Python used KST string: YYYY-MM-DD HH:MM
@@ -338,15 +355,40 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
         const stdUtcStr = f.stdUtc ? f.stdUtc.toISOString().substring(11, 16) : "?";
         const staUtcStr = f.staUtc ? f.staUtc.toISOString().substring(11, 16) : "?";
         
-        memo.push(`${f.flt}: ${f.stdStr} (UTC ${stdUtcStr})`);
-        if (f.ac) {
-            memo.push(`-> ${f.staStr} (UTC ${staUtcStr}) (A/C: ${f.ac})`);
+        const startLabel = isGroundSchool ? "수업 시작" : (isSim ? "훈련 시작" : "출발");
+        const endLabel = isGroundSchool ? "수업 종료" : (isSim ? "훈련 종료" : "도착");
+        memo.push(`${startLabel} ${f.stdStr} (UTC ${stdUtcStr})`);
+        memo.push(`${endLabel} ${f.staStr} (UTC ${staUtcStr})`);
+        if (isGroundSchool) {
+            memo.push(`Class Time : ${blkDur}`);
+        } else if (isSim) {
+            const timeOnly = f.stdStr.substring(11, 16);
+            const simSessions: Record<string, string> = {
+                "07:00": "08:30~12:30",
+                "11:00": "12:30~16:30",
+                "15:50": "17:30~21:30",
+                "20:30": "21:30~01:30",
+                "00:30": "01:30~05:30"
+            };
+            if (simSessions[timeOnly]) {
+                memo.push(`FFS TRNG ${simSessions[timeOnly]}`);
+            } else {
+                memo.push(`Sim Time : ${blkDur}`);
+            }
         } else {
-            memo.push(`-> ${f.staStr} (UTC ${staUtcStr})`);
+            memo.push(`Block Time : ${blkDur}`);
         }
-        memo.push(`Block Time : ${blkDur}`);
 
-        // Per diem calculation matches python logic exactly
+        memo.push("");
+
+        const label = isGroundSchool ? `Class Members` : (isSim ? `Simulator Crew` : `Crew`);
+        memo.push(`★ ${f.flt} ${label} ★`);
+
+        if (f.crews) {
+            memo.push(...f.crews);
+        }
+
+        // Per diem calculation moved here (between flights)
         if (i < r.length - 1) {
             const next_f = r[i+1];
             if (next_f.stdUtc && f.staUtc) {
@@ -354,9 +396,13 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
                 const stayH = stayDiffMs / 3600000;
                 const isDom = KOREA_PORTS.includes(f.dep) && KOREA_PORTS.includes(f.arr);
                 
+                memo.push(""); // Add a blank line for visibility
                 if (isDom) {
                     const domPay = isCap ? 26000 : 20000;
-                    memo.push(`Domestic Stay : ${formatDuration(stayDiffMs)} (Allowance : ${domPay.toLocaleString()} KRW)`);
+                    memo.push(`🏨 Domestic Stay : ${formatDuration(stayDiffMs)} (Allowance : ${domPay.toLocaleString()} KRW)`);
+                    if (HOTELS[f.arr]) {
+                        memo.push(`🛌 Stay Hotel : ${HOTELS[f.arr]}`);
+                    }
                     perDiemTotal.krw += domPay;
                 } else {
                     if (stayH < 4) {
@@ -366,25 +412,24 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
                         else if (isCap) pdVal = 50;
                         else if (total_h >= 5) pdVal = 41;
                         
-                        memo.push(`Quick Turn (Per Diem : $${pdVal.toFixed(2)})`);
+                        memo.push(`⏱️ Quick Turn : ${formatDuration(stayDiffMs)} (Per Diem : $${pdVal.toFixed(2)})`);
                         perDiemTotal.usd += pdVal;
                     } else {
                         const { rate, currency } = getRateInfo(f.arr);
                         const pdVal = stayH * rate;
-                        memo.push(`Stay Hours : ${formatDuration(stayDiffMs)} (Per Diem : ${pdVal.toFixed(2)} ${currency})`);
+                        memo.push(`🏨 Stay Hours : ${formatDuration(stayDiffMs)} (Per Diem : ${pdVal.toFixed(2)} ${currency})`);
+                        if (HOTELS[f.arr]) {
+                            memo.push(`🛌 Stay Hotel : ${HOTELS[f.arr]}`);
+                        }
                         if (currency === "€") {
                             perDiemTotal.eur += pdVal;
+
                         } else {
                             perDiemTotal.usd += pdVal;
                         }
                     }
                 }
             }
-        }
-
-        memo.push(`★ ${f.flt} Crew ★`);
-        if (f.crews) {
-            memo.push(...f.crews);
         }
         memo.push("");
     }
@@ -403,7 +448,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       location: `${f1.dep} -> ${fL.arr}`,
       start: { dateTime: startDtObj.toISOString() },
       end: { dateTime: endDtObj.toISOString() },
-      type: isSim ? 'TRG' : 'FLT'
+      type: isGroundSchool ? 'GND' : (isSim ? 'TRG' : 'FLT')
     });
   }
 
@@ -464,7 +509,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
         }
       }
       summary = "STANDBY";
-    } else if (cev.type === 'TRG') {
+    } else if (cev.type === 'TRG' || cev.type === 'GND') {
       const [hh_s, mm_s] = cev.start.split(':').map(Number);
       const [hh_e, mm_e] = cev.end.split(':').map(Number);
       startHour = hh_s; startMin = mm_s;
@@ -490,18 +535,33 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       eventDescription = `${stbyLabel} ${startStr} ~ ${endStr}`;
     }
 
-    payloadEvents.push({
+    const eventPayload: any = {
       summary,
       description: eventDescription,
       location,
-      start: { dateTime: startDt.toISOString(), timeZone: 'Asia/Seoul' },
-      end: { dateTime: endDt.toISOString(), timeZone: 'Asia/Seoul' },
       type: cev.type
-    });
+    };
+
+    if (cev.type === 'RSV') {
+      const startDateStr = `${yyyy}-${(mm + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      const nextDayObj = new Date(Date.UTC(yyyy, mm, day + 1));
+      const endDateStr = nextDayObj.toISOString().split('T')[0];
+      eventPayload.start = { date: startDateStr };
+      eventPayload.end = { date: endDateStr };
+    } else {
+      eventPayload.start = { dateTime: startDt.toISOString(), timeZone: 'Asia/Seoul' };
+      eventPayload.end = { dateTime: endDt.toISOString(), timeZone: 'Asia/Seoul' };
+    }
+
+    payloadEvents.push(eventPayload);
   }
 
   // Sort payload by start date
-  payloadEvents.sort((a, b) => new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime());
+  payloadEvents.sort((a, b) => {
+    const timeA = new Date(a.start.dateTime || a.start.date).getTime();
+    const timeB = new Date(b.start.dateTime || b.start.date).getTime();
+    return timeA - timeB;
+  });
 
   return { events: payloadEvents, perDiemTotal, flightsCount, totalFlightTimeMs };
 }

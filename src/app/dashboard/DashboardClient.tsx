@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calendar, DollarSign, UploadCloud, Plane, CheckCircle2, Eye, CalendarCheck, BookOpen, Clock, ShieldAlert, ExternalLink, Heart, Users, Trash2 } from "lucide-react";
+import { Calendar, DollarSign, UploadCloud, Plane, CheckCircle2, Eye, CalendarCheck, BookOpen, Clock, ShieldAlert, ExternalLink, Heart, Users, Trash2, Building } from "lucide-react";
 import styles from "./page.module.css";
 import { motion, AnimatePresence } from "framer-motion";
 import BookmarkletGuide from "./BookmarkletGuide";
@@ -105,7 +105,8 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
   const getEventIcon = (type: string) => {
     switch (type) {
       case 'FLT': return <Plane size={16} color="#60a5fa" />;
-      case 'TRG': return <BookOpen size={16} color="#c084fc" />;
+      case 'GND': return <BookOpen size={16} color="#4ade80" />;
+      case 'TRG': return <Building size={16} color="#c084fc" />;
       case 'RSV': return <ShieldAlert size={16} color="#f87171" />;
       case 'STBY': return <Clock size={16} color="#fbbf24" />;
       case 'MEDCHK': return <Heart size={16} color="#f472b6" />;
@@ -117,6 +118,7 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
   const getEventColor = (type: string) => {
     switch (type) {
       case 'FLT': return '#93c5fd';
+      case 'GND': return '#86efac';
       case 'TRG': return '#d8b4fe';
       case 'RSV': return '#fca5a5';
       case 'STBY': return '#fde047';
@@ -345,10 +347,16 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
 
             <div style={{ maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '8px' }}>
               {previewEvents.map((ev, idx) => {
-                const start = new Date(ev.start.dateTime);
-                const end = new Date(ev.end.dateTime);
+                const start = new Date(ev.start.dateTime || ev.start.date);
+                const end = new Date(ev.end.dateTime || ev.end.date);
                 const dateStr = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                const timeStr = `${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                
+                let timeStr = "";
+                if (ev.start.date) {
+                  timeStr = "All Day";
+                } else {
+                  timeStr = `${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                }
                 
                 return (
                   <div 

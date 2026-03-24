@@ -23,8 +23,8 @@ export async function POST(req: Request) {
       // 1. Determine target month (the month that contains the most events)
       const monthCounts: Record<string, number> = {};
       events.forEach((ev: any) => {
-        const d = new Date(ev.start.dateTime);
-        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        const d = new Date(ev.start.dateTime || ev.start.date);
+        const key = `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
         monthCounts[key] = (monthCounts[key] || 0) + 1;
       });
       const targetMonthKey = Object.keys(monthCounts).sort((a, b) => monthCounts[b] - monthCounts[a])[0];
