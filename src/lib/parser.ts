@@ -306,7 +306,36 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     let startDtObj = f1.stdUtc ? f1.stdUtc : new Date(); 
     
     if (!isSim && f1.stdUtc) {
-      const offsetMs = f1.dep === 'ICN' ? (95 * 60000) : (100 * 60000);
+      const isDom = KOREA_PORTS.includes(f1.dep) && KOREA_PORTS.includes(f1.arr);
+      
+      let offsetMs = 0;
+      if (f1.dep === 'GMP') {
+        offsetMs = isDom ? 70 * 60000 : 100 * 60000;
+      } else if (f1.dep === 'ICN') {
+        offsetMs = isDom ? 70 * 60000 : 95 * 60000;
+      } else {
+        offsetMs = isDom ? 70 * 60000 : 95 * 60000; // Fallback
+      }
+      
+      const isDH = f1.flt.startsWith('DH');
+      
+      let hasContinuousDuty = false;
+      if (r.length > 1) {
+        const next_f = r[1];
+        if (next_f.stdUtc && f1.staUtc) {
+          const stayDiffMs = next_f.stdUtc.getTime() - f1.staUtc.getTime();
+          const stayH = stayDiffMs / 3600000;
+          if (stayH < 4) { // Quick turn implies continuous duty
+            hasContinuousDuty = true;
+          }
+        }
+      }
+
+      // DH exception: ICN International DH flight without continuous duty = 60 mins
+      if (f1.dep === 'ICN' && !isDom && isDH && !hasContinuousDuty) {
+        offsetMs = 60 * 60000;
+      }
+
       showUpDt = new Date(f1.stdUtc.getTime() - offsetMs);
     }
 
