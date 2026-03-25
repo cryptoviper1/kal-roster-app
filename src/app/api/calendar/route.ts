@@ -3,10 +3,6 @@ import { auth } from "@/auth";
 import { parseDetailedSchedule, parseCalendarSchedule, generateEvents } from "@/lib/parser";
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session || !session.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   try {
     const { detailedText, calendarText } = await req.json();
