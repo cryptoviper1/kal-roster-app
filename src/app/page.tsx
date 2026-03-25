@@ -31,6 +31,29 @@ export default function LandingPage() {
             </button>
           </form>
 
+          <a 
+            href="/dashboard" 
+            className="secondary-button" 
+            style={{ 
+              display: 'block', 
+              width: '100%', 
+              padding: '16px', 
+              marginTop: '12px', 
+              textAlign: 'center', 
+              textDecoration: 'none',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px',
+              color: '#d1d5db',
+              fontWeight: 600,
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#ffffff'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#d1d5db'; }}
+          >
+            Continue without Google
+          </a>
+
           <div style={{
             marginTop: '24px',
             padding: '16px',

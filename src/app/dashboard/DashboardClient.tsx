@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calendar, DollarSign, UploadCloud, Plane, CheckCircle2, Eye, CalendarCheck, BookOpen, Clock, ShieldAlert, ExternalLink, Heart, Users, Trash2, Building } from "lucide-react";
+import { Calendar, DollarSign, UploadCloud, Plane, CheckCircle2, Eye, CalendarCheck, BookOpen, Clock, ShieldAlert, ExternalLink, Heart, Users, Trash2, Building, Download } from "lucide-react";
 import styles from "./page.module.css";
 import { motion, AnimatePresence } from "framer-motion";
 import BookmarkletGuide from "./BookmarkletGuide";
 
-export default function DashboardClient({ initialData }: { initialData?: any }) {
+export default function DashboardClient({ initialData, isLoggedIn = false }: { initialData?: any, isLoggedIn?: boolean }) {
   const [calText, setCalText] = useState("");
   const [detText, setDetText] = useState("");
   const [isParsing, setIsParsing] = useState(false);
@@ -100,6 +100,50 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
     } finally {
       setIsSyncing(false);
     }
+  };
+
+  const handleDownloadCSV = () => {
+    if (previewEvents.length === 0) return;
+
+    let csvContent = "Subject,Start Date,Start Time,End Date,End Time,Description,Location\n";
+
+    previewEvents.forEach(ev => {
+      const subject = `"${ev.summary.replace(/"/g, '""')}"`;
+      const description = ev.description ? `"${ev.description.replace(/"/g, '""')}"` : "";
+      const location = ev.location ? `"${ev.location.replace(/"/g, '""')}"` : "";
+
+      let startDate = "";
+      let startTime = "All Day";
+      let endDate = "";
+      let endTime = "All Day";
+
+      if (ev.start?.date) {
+        startDate = ev.start.date; 
+        endDate = ev.end.date;
+      } else {
+        const s = new Date(ev.start?.dateTime);
+        const e = new Date(ev.end?.dateTime);
+        
+        startDate = `${s.getMonth() + 1}/${s.getDate()}/${s.getFullYear()}`;
+        startTime = s.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' });
+        
+        endDate = `${e.getMonth() + 1}/${e.getDate()}/${e.getFullYear()}`;
+        endTime = e.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' });
+      }
+
+      csvContent += `${subject},${startDate},${startTime},${endDate},${endTime},${description},${location}\n`;
+    });
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "flight_schedule.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setSuccessMsg("🎉 Schedule downloaded as CSV! You can now import it into your calendar.");
   };
 
   const getEventIcon = (type: string) => {
@@ -325,18 +369,39 @@ export default function DashboardClient({ initialData }: { initialData?: any }) 
             className={`glass-panel ${styles.card}`} 
             style={{ gridColumn: '1 / -1', marginTop: '8px' }}
           >
-           <div className={styles.cardTitle} style={{ justifyContent: 'space-between', width: '100%' }}>
+            <div className={styles.cardTitle} style={{ justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Eye size={20} color="#a78bfa" /> Schedule Preview ({previewEvents.length} events)
               </div>
-              <button 
-                onClick={handleFinalSync}
-                disabled={isSyncing}
-                className="primary-button"
-                style={{ background: '#10b981', padding: '10px 20px', fontSize: '0.95rem', alignSelf: 'flex-end', display: 'flex', alignItems: 'center', gap: '8px', cursor: isSyncing ? 'wait' : 'pointer', opacity: isSyncing ? 0.7 : 1 }}
-              >
-                <CalendarCheck size={18} /> {isSyncing ? "Syncing to Google..." : "Confirm & Insert to Google Calendar"}
-              </button>
+              
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button 
+                  onClick={handleDownloadCSV}
+                  className="secondary-button"
+                  style={{ background: 'rgba(255,255,255,0.1)', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: '8px' }}
+                >
+                  <Download size={18} /> Download CSV
+                </button>
+                
+                {isLoggedIn ? (
+                  <button 
+                    onClick={handleFinalSync}
+                    disabled={isSyncing}
+                    className="primary-button"
+                    style={{ background: '#10b981', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: isSyncing ? 'wait' : 'pointer', opacity: isSyncing ? 0.7 : 1, border: 'none', borderRadius: '8px', color: 'white', fontWeight: 600 }}
+                  >
+                    <CalendarCheck size={18} /> {isSyncing ? "Syncing..." : "Sync to Google Calendar"}
+                  </button>
+                ) : (
+                  <a 
+                    href="/"
+                    className="primary-button"
+                    style={{ background: '#60a5fa', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 600, textDecoration: 'none' }}
+                  >
+                    Sign in to Sync
+                  </a>
+                )}
+              </div>
             </div>
             
             {successMsg.includes("🎉") && (

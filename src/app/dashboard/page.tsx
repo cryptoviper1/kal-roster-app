@@ -1,14 +1,13 @@
 import { auth, signOut } from "../../auth";
-import { LogOut } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import styles from "./page.module.css";
 import Image from "next/image";
-import { redirect } from "next/navigation";
 import DashboardClient from "./DashboardClient";
 import { cookies } from "next/headers";
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user) redirect("/");
+  const isLoggedIn = !!session?.user;
 
   // Check if there is payload data stashed in cookies from the Bookmarklet
   const cookieStore = await cookies();
@@ -25,7 +24,7 @@ export default async function DashboardPage() {
     <main className={styles.container}>
       <header className={styles.header}>
         <div className={styles.profile}>
-          {session.user.image ? (
+          {isLoggedIn && session?.user?.image ? (
             <Image 
               src={session.user.image} 
               alt="Profile" 
@@ -34,28 +33,40 @@ export default async function DashboardPage() {
               className={styles.avatar} 
             />
           ) : (
-            <div className={styles.avatar} />
+            <div className={styles.avatar} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)' }}>
+              <User size={24} color="#9ca3af" />
+            </div>
           )}
           <div>
-            <h2 className="title-gradient" style={{ fontSize: '1.5rem', marginBottom: 0 }}>Welcome back,</h2>
-            <p className="subtitle" style={{ fontSize: '1rem' }}>{session.user.name}</p>
+            <h2 className="title-gradient" style={{ fontSize: '1.5rem', marginBottom: 0 }}>
+              {isLoggedIn ? "Welcome back," : "Welcome,"}
+            </h2>
+            <p className="subtitle" style={{ fontSize: '1rem' }}>
+              {isLoggedIn ? session?.user?.name : "Guest Pilot"}
+            </p>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <a href="/privacy" style={{ fontSize: '0.85rem', color: '#9ca3af', textDecoration: 'none' }} className="hover:text-white transition-colors">Privacy</a>
           <a href="/terms" style={{ fontSize: '0.85rem', color: '#9ca3af', textDecoration: 'none' }} className="hover:text-white transition-colors">Terms</a>
-          <form action={async () => {
-            "use server";
-            await signOut({ redirectTo: "/" });
-          }}>
-            <button type="submit" className="glass-button">
-              <LogOut size={18} /> Sign Out
-            </button>
-          </form>
+          {isLoggedIn ? (
+            <form action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/" });
+            }}>
+              <button type="submit" className="glass-button">
+                <LogOut size={18} /> Sign Out
+              </button>
+            </form>
+          ) : (
+            <a href="/" className="glass-button" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              Sign In
+            </a>
+          )}
         </div>
       </header>
 
-      <DashboardClient initialData={initialRosterData} />
+      <DashboardClient initialData={initialRosterData} isLoggedIn={isLoggedIn} />
     </main>
   );
 }
