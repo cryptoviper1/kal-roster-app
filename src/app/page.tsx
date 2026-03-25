@@ -1,5 +1,5 @@
 import { signIn } from "../auth";
-import { PlaneTakeoff, ShieldAlert, CalendarSync, Lock, Zap } from "lucide-react";
+import { PlaneTakeoff, ShieldAlert, CalendarSync, Lock, Zap, Youtube } from "lucide-react";
 import styles from "./page.module.css";
 
 export default function LandingPage() {
@@ -107,7 +107,11 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className={styles.footer}>
-        <div className={styles.footerLinks}>
+        <div className={styles.footerLinks} style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
+          <a href="https://youtu.be/EpiMilNxGXo" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#f87171', fontWeight: 600 }}>
+            <Youtube size={16} /> Guide Video
+          </a>
+          <span style={{ color: '#4b5563' }}>|</span>
           <a href="/privacy">Privacy Policy</a>
           <span style={{ color: '#4b5563' }}>|</span>
           <a href="/terms">Terms of Service</a>

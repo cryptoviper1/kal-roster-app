@@ -1,5 +1,5 @@
 import { auth, signOut } from "../../auth";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Youtube } from "lucide-react";
 import styles from "./page.module.css";
 import Image from "next/image";
 import DashboardClient from "./DashboardClient";
@@ -46,7 +46,10 @@ export default async function DashboardPage() {
             </p>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+          <a href="https://youtu.be/EpiMilNxGXo" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', color: '#f87171', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }} className="hover:text-white transition-colors">
+            <Youtube size={16} /> Guide Video
+          </a>
           <a href="/privacy" style={{ fontSize: '0.85rem', color: '#9ca3af', textDecoration: 'none' }} className="hover:text-white transition-colors">Privacy</a>
           <a href="/terms" style={{ fontSize: '0.85rem', color: '#9ca3af', textDecoration: 'none' }} className="hover:text-white transition-colors">Terms</a>
           {isLoggedIn ? (
