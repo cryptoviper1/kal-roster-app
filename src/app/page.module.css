@@ -2,21 +2,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   min-height: 100vh;
-  padding: 24px;
+  padding: 64px 24px;
   position: relative;
   z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-.loginCard {
+.hero {
+  text-align: center;
+  margin-bottom: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 450px;
-  padding: 48px 32px;
-  text-align: center;
 }
 
 .iconWrapper {
@@ -31,13 +31,118 @@
   color: var(--accent-color);
 }
 
+.heroTitle {
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.heroSubtitle {
+  font-size: 1.15rem;
+  color: #9ca3af;
+  max-width: 600px;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.loginCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 450px;
+  padding: 40px 32px;
+  text-align: center;
+}
+
 .formWrapper {
   width: 100%;
-  margin-top: 32px;
 }
 
 .loginButton {
   width: 100%;
   padding: 16px;
   font-size: 1.1rem;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  width: 100%;
+  margin-bottom: 64px;
+}
+
+.featureCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  text-align: left;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.featureCard:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.featureIcon {
+  color: var(--accent-color);
+  margin-bottom: 20px;
+  padding: 12px;
+  background: rgba(0, 100, 210, 0.1);
+  border-radius: 12px;
+}
+
+.featureTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin-bottom: 12px;
+}
+
+.featureDescription {
+  color: #9ca3af;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 24px;
+  font-size: 0.95rem;
+}
+
+.footerLinks a {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footerLinks a:hover {
+  color: #e5e7eb;
+}
+
+.footerText {
+  color: #6b7280;
+  font-size: 0.85rem;
+  max-width: 600px;
+  line-height: 1.5;
 }
