@@ -26,14 +26,17 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
     if (initialData && initialData.calendarText) {
       setCalText(initialData.calendarText);
       setDetText(initialData.detailedText || "");
-      
-      // Clear the cookie so it doesn't re-inject on refresh
-      document.cookie = 'rosterPayload=; Max-Age=0; path=/';
-      
-      // Auto-parse if data exists from Bookmarklet
-      handleParsePreviewDirect(initialData.calendarText, initialData.detailedText || "");
+
+      // Clear the HttpOnly cookie server-side (can't be done via document.cookie)
+      fetch("/api/clear-cookie", { method: "DELETE" }).catch(console.error);
+
+      // Auto-parse with proper error handling
+      handleParsePreviewDirect(initialData.calendarText, initialData.detailedText || "")
+        .catch(console.error);
     }
-  }, [initialData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // initialData comes from server once; empty deps prevents re-parse on re-render
+
 
   const handleParsePreviewDirect = async (cText: string, dText: string) => {
     if (!cText && !dText) {
