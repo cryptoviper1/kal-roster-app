@@ -146,3 +146,23 @@
   max-width: 600px;
   line-height: 1.5;
 }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 32px 16px;
+  }
+  .hero {
+    margin-bottom: 40px;
+  }
+  .loginCard {
+    padding: 32px 24px;
+    margin-bottom: 40px;
+  }
+  .features {
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .featureCard {
+    padding: 24px;
+  }
+}

@@ -374,11 +374,11 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
                 <Eye size={20} color="#a78bfa" /> Schedule Preview ({previewEvents.length} events)
               </div>
               
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', width: '100%' }}>
                 <button 
                   onClick={handleDownloadCSV}
                   className="secondary-button"
-                  style={{ background: 'rgba(255,255,255,0.1)', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: '8px' }}
+                  style={{ background: 'rgba(255,255,255,0.1)', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '1', minWidth: '200px', gap: '8px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: '8px' }}
                 >
                   <Download size={18} /> Download CSV
                 </button>
@@ -388,7 +388,7 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
                     onClick={handleFinalSync}
                     disabled={isSyncing}
                     className="primary-button"
-                    style={{ background: '#10b981', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: isSyncing ? 'wait' : 'pointer', opacity: isSyncing ? 0.7 : 1, border: 'none', borderRadius: '8px', color: 'white', fontWeight: 600 }}
+                    style={{ background: '#10b981', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '1', minWidth: '200px', gap: '8px', cursor: isSyncing ? 'wait' : 'pointer', opacity: isSyncing ? 0.7 : 1, border: 'none', borderRadius: '8px', color: 'white', fontWeight: 600 }}
                   >
                     <CalendarCheck size={18} /> {isSyncing ? "Syncing..." : "Sync to Google Calendar"}
                   </button>
@@ -396,7 +396,7 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
                   <a 
                     href="/"
                     className="primary-button"
-                    style={{ background: '#60a5fa', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 600, textDecoration: 'none' }}
+                    style={{ background: '#60a5fa', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '1', minWidth: '200px', gap: '8px', cursor: 'pointer', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 600, textDecoration: 'none' }}
                   >
                     Sign in to Sync
                   </a>
@@ -410,7 +410,7 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
               </div>
             )}
 
-            <div style={{ maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '8px' }}>
+            <div style={{ maxHeight: '65vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '8px' }}>
               {previewEvents.map((ev, idx) => {
                 const start = new Date(ev.start.dateTime || ev.start.date);
                 const end = new Date(ev.end.dateTime || ev.end.date);
