@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { events } = await req.json();
+    const { events, calendarId = "primary" } = await req.json();
     if (!events || !Array.isArray(events)) {
       return NextResponse.json({ error: "Invalid events payload" }, { status: 400 });
     }
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
       // 3. Fetch existing events in that month
       const existingRes = await calendar.events.list({
-        calendarId: "primary",
+        calendarId,
         timeMin,
         timeMax,
         singleEvents: true,
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       // 5. Delete old events
       for (const ev of eventsToDelete) {
         if (ev.id) {
-          await calendar.events.delete({ calendarId: "primary", eventId: ev.id });
+          await calendar.events.delete({ calendarId, eventId: ev.id });
           deletedCount++;
         }
       }
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
       delete cleanEv.type;
       cleanEv.extendedProperties = { private: { source: 'kalroster' } };
       
-      await calendar.events.insert({ calendarId: "primary", requestBody: cleanEv });
+      await calendar.events.insert({ calendarId, requestBody: cleanEv });
       insertedCount++;
     }
 

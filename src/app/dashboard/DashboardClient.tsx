@@ -21,6 +21,9 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
   });
   const [previewEvents, setPreviewEvents] = useState<any[]>([]);
   const [expandedEvent, setExpandedEvent] = useState<number | null>(null);
+  const [calendars, setCalendars] = useState<{ id: string; summary: string; backgroundColor: string; primary: boolean }[]>([]);
+  const [selectedCalendarId, setSelectedCalendarId] = useState("primary");
+  const [isFetchingCalendars, setIsFetchingCalendars] = useState(false);
 
   useEffect(() => {
     if (initialData && initialData.calendarText) {
@@ -81,6 +84,22 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
     return handleParsePreviewDirect(calText, detText);
   };
 
+  const fetchCalendars = async () => {
+    if (calendars.length > 0 || isFetchingCalendars) return;
+    setIsFetchingCalendars(true);
+    try {
+      const res = await fetch("/api/calendar/list");
+      const data = await res.json();
+      if (res.ok && data.calendars) {
+        setCalendars(data.calendars);
+      }
+    } catch (e) {
+      console.error("Failed to fetch calendars", e);
+    } finally {
+      setIsFetchingCalendars(false);
+    }
+  };
+
   const handleFinalSync = async () => {
     setIsSyncing(true);
     setSuccessMsg("");
@@ -89,7 +108,7 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
       const res = await fetch("/api/calendar/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ events: previewEvents }),
+        body: JSON.stringify({ events: previewEvents, calendarId: selectedCalendarId }),
       });
 
       const data = await res.json();
@@ -387,14 +406,40 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
                 </button>
                 
                 {isLoggedIn ? (
-                  <button 
-                    onClick={handleFinalSync}
-                    disabled={isSyncing}
-                    className="primary-button"
-                    style={{ background: '#10b981', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '1', minWidth: '200px', gap: '8px', cursor: isSyncing ? 'wait' : 'pointer', opacity: isSyncing ? 0.7 : 1, border: 'none', borderRadius: '8px', color: 'white', fontWeight: 600 }}
-                  >
-                    <CalendarCheck size={18} /> {isSyncing ? "Syncing..." : "Sync to Google Calendar"}
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: '1', minWidth: '200px' }}>
+                    <select
+                      value={selectedCalendarId}
+                      onChange={(e) => setSelectedCalendarId(e.target.value)}
+                      onFocus={fetchCalendars}
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        background: 'rgba(255,255,255,0.08)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        color: 'white',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        width: '100%',
+                      }}
+                    >
+                      <option value="primary" style={{ background: '#1e293b' }}>
+                        📅 {isFetchingCalendars ? '불러오는 중...' : '기본 캘린더 (Google Calendar)'}
+                      </option>
+                      {calendars.filter(c => !c.primary).map((cal) => (
+                        <option key={cal.id} value={cal.id!} style={{ background: '#1e293b' }}>
+                          🗓 {cal.summary}
+                        </option>
+                      ))}
+                    </select>
+                    <button 
+                      onClick={handleFinalSync}
+                      disabled={isSyncing}
+                      className="primary-button"
+                      style={{ background: '#10b981', padding: '10px 20px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: isSyncing ? 'wait' : 'pointer', opacity: isSyncing ? 0.7 : 1, border: 'none', borderRadius: '8px', color: 'white', fontWeight: 600 }}
+                    >
+                      <CalendarCheck size={18} /> {isSyncing ? "Syncing..." : "Sync to Google Calendar"}
+                    </button>
+                  </div>
                 ) : (
                   <a 
                     href="/"
