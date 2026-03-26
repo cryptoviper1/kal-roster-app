@@ -436,12 +436,27 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
                 } else {
                     if (stayH < 4) {
                         const total_h = totalBlockSeconds / 3600;
-                        let pdVal = 35;
-                        if (isCap && total_h >= 5) pdVal = 60;
-                        else if (isCap) pdVal = 50;
-                        else if (total_h >= 5) pdVal = 41;
-                        
-                        memo.push(`⏱️ Quick Turn : ${formatDuration(stayDiffMs)} (Per Diem : $${pdVal.toFixed(2)})`);
+                        // 합의서 3항: 기장 $60 / 부기장 $45 (기본)
+                        // SKD Block Time 총 5시간 이상: 기장 $70 / 부기장 $51
+                        let pdVal = isCap ? 60 : 45;
+                        if (isCap && total_h >= 5) pdVal = 70;
+                        else if (!isCap && total_h >= 5) pdVal = 51;
+
+                        // 합의서 3항: KST 22:00~익일06:00 한국 출발(STD) 또는
+                        //             KST 22:00~익일08:00 한국 도착(STA) → 2배 지급
+                        let isNightQT = false;
+                        if (f1.stdUtc && KOREA_PORTS.includes(f1.dep)) {
+                          const kstHour = (f1.stdUtc.getUTCHours() + 9) % 24;
+                          if (kstHour >= 22 || kstHour < 6) isNightQT = true;
+                        }
+                        if (fL.staUtc && KOREA_PORTS.includes(fL.arr)) {
+                          const kstHour = (fL.staUtc.getUTCHours() + 9) % 24;
+                          if (kstHour >= 22 || kstHour < 8) isNightQT = true;
+                        }
+                        if (isNightQT) pdVal *= 2;
+
+                        const nightLabel = isNightQT ? ' (야간 2배)' : '';
+                        memo.push(`⏱️ Quick Turn : ${formatDuration(stayDiffMs)} (Per Diem : $${pdVal.toFixed(2)}${nightLabel})`);
                         perDiemTotal.usd += pdVal;
                     } else {
                         const { rate, currency } = getRateInfo(f.arr);
