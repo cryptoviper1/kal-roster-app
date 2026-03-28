@@ -65,7 +65,17 @@ export default function PrivacyPolicy() {
         </section>
 
         <section>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'white', marginBottom: '12px' }}>6. 문의처</h2>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'white', marginBottom: '12px' }}>6. 민감한 데이터 보호 메커니즘 (Data Protection Mechanisms)</h2>
+          <ul style={{ listStyleType: 'disc', paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <li><strong>전송 구간 암호화 (Encryption in transit):</strong> 사용자의 브라우저와 서버 간의 모든 통신은 보안 소켓 계층(SSL/TLS) 표준 암호화 통신인 HTTPS를 통해 안전하게 보호됩니다.</li>
+            <li><strong>저장 구간 암호화 (Encryption at rest):</strong> 앱 운영 중 제한적으로 임시 유지되어야 하는 구글 접근 토큰(액세스 토큰) 및 세션 등의 민감 정보는 암호화되어 안전하게 보관됩니다.</li>
+            <li><strong>접근 제어 (Access Controls):</strong> 시스템, 서버 및 데이터에 대한 접근은 필수적인 관리자에게만 제한적이고 안전한 방식으로 허용되며, 지속적인 모니터링을 수행합니다.</li>
+            <li><strong>최소 권한의 원칙 (Principle of least privilege):</strong> 구글 캘린더 등 민감 데이터에 대해서는 필수적인 최소한의 접근 스코프(읽기/쓰기 권한)만을 요청하며, 불필요한 열람은 일절 수행하지 않습니다.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'white', marginBottom: '12px' }}>7. 문의처</h2>
           <p>
             본 개인정보처리방침이나 서비스 이용과 관련한 문의사항이 있으시면 아래 이메일로 연락해 주시기 바랍니다.<br />
             <strong>onu0823@gmail.com</strong>
