@@ -47,7 +47,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-          <a href="https://youtu.be/EpiMilNxGXo" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', color: '#f87171', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }} className="hover:text-white transition-colors">
+          <a href="https://youtu.be/opCVI8M1AkI" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', color: '#f87171', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }} className="hover:text-white transition-colors">
             <Youtube size={16} /> Guide Video
           </a>
           <a href="/privacy" style={{ fontSize: '0.85rem', color: '#9ca3af', textDecoration: 'none' }} className="hover:text-white transition-colors">Privacy</a>
