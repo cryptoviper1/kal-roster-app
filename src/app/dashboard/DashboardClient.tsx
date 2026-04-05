@@ -174,6 +174,7 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
       case 'GND': return <BookOpen size={16} color="#4ade80" />;
       case 'TRG': return <Building size={16} color="#c084fc" />;
       case 'RSV': return <ShieldAlert size={16} color="#f87171" />;
+      case 'SICK': return <ShieldAlert size={16} color="#f87171" />;
       case 'STBY': return <Clock size={16} color="#fbbf24" />;
       case 'MEDCHK': return <Heart size={16} color="#f472b6" />;
       case 'UNION': return <Users size={16} color="#fb923c" />;
@@ -187,6 +188,7 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
       case 'GND': return '#86efac';
       case 'TRG': return '#d8b4fe';
       case 'RSV': return '#fca5a5';
+      case 'SICK': return '#fca5a5';
       case 'STBY': return '#fde047';
       case 'MEDCHK': return '#f9a8d4';
       case 'UNION': return '#fdba74';

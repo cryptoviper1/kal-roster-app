@@ -215,6 +215,8 @@ export function parseCalendarSchedule(text: string) {
       const upperLine = line.toUpperCase();
       if (upperLine.includes('RESERVE') || upperLine.includes('RSV')) {
         events.push({ type: "RSV", day: currentDay, text: "Reserve" });
+      } else if (upperLine === 'SICK') {
+        events.push({ type: "SICK", day: currentDay, text: "Sick Leave" });
       } else if (upperLine.includes('MEDCHK') || upperLine.includes('MEDICAL')) {
         events.push({ type: "MEDCHK", day: currentDay, text: "Medical Check" });
       } else if (upperLine === 'UNION') {
@@ -509,7 +511,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
 
   for (const cev of calEvents) {
     const day = cev.day;
-    if (flightDays.has(day) && !['RSV', 'STBY', 'MEDCHK', 'UNION'].includes(cev.type)) continue;
+    if (flightDays.has(day) && !['RSV', 'STBY', 'MEDCHK', 'UNION', 'SICK'].includes(cev.type)) continue;
 
     const kstBaseDate = new Date(baseDate.getTime() + 9 * 3600000);
     const yyyy = kstBaseDate.getUTCFullYear();
@@ -525,6 +527,10 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       startHour = 0; startMin = 0;
       endHour = 23; endMin = 59;
       summary = "RESERVE";
+    } else if (cev.type === 'SICK') {
+      startHour = 0; startMin = 0;
+      endHour = 23; endMin = 59;
+      summary = "SICK";
     } else if (cev.type === 'MEDCHK') {
       startHour = 0; startMin = 0;
       endHour = 23; endMin = 59;
@@ -586,7 +592,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       type: cev.type
     };
 
-    if (cev.type === 'RSV') {
+    if (cev.type === 'RSV' || cev.type === 'SICK') {
       const startDateStr = `${yyyy}-${(mm + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
       const nextDayObj = new Date(Date.UTC(yyyy, mm, day + 1));
       const endDateStr = nextDayObj.toISOString().split('T')[0];
