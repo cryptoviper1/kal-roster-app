@@ -221,8 +221,6 @@ export function parseCalendarSchedule(text: string) {
         events.push({ type: "MEDCHK", day: currentDay, text: "Medical Check" });
       } else if (upperLine === 'UNION') {
         events.push({ type: "UNION", day: currentDay, text: "Union" });
-      } else if (upperLine.includes('SBY')) {
-        events.push({ type: "STBY", day: currentDay, text: upperLine });
       } else {
         const match = line.match(/([A-Za-z0-9_]+)?[A-Z]{3}\s+(\d{2}:\d{2})\s*-\s*[A-Z]{3}\s+(\d{2}:\d{2})/);
         if (match) {
@@ -253,6 +251,8 @@ export function parseCalendarSchedule(text: string) {
               });
             }
           }
+        } else if (upperLine.includes('SBY')) {
+          events.push({ type: "STBY", day: currentDay, text: upperLine });
         }
       }
     }
