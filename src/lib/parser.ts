@@ -558,7 +558,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
           endMin = startMin;
         }
       }
-      summary = "STANDBY";
+      summary = cev.subject || "STANDBY";
     } else if (cev.type === 'TRG' || cev.type === 'GND') {
       const [hh_s, mm_s] = cev.start.split(':').map(Number);
       const [hh_e, mm_e] = cev.end.split(':').map(Number);
