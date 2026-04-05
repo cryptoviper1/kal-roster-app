@@ -234,7 +234,7 @@ export function parseCalendarSchedule(text: string) {
               events.push({
                 type: "STBY",
                 day: currentDay,
-                text: upperLine,
+                text: line,
                 subject,
                 start: startTime,
                 end: endTime
@@ -252,7 +252,7 @@ export function parseCalendarSchedule(text: string) {
             }
           }
         } else if (upperLine.includes('SBY')) {
-          events.push({ type: "STBY", day: currentDay, text: upperLine });
+          events.push({ type: "STBY", day: currentDay, text: line });
         }
       }
     }
@@ -579,10 +579,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     // Build description with actual duty info for STBY
     let eventDescription = `Schedule Type: ${cev.type} parsed from Calendar.`;
     if (cev.type === 'STBY') {
-      const stbyLabel = cev.subject || 'STBY';
-      const startStr = `${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`;
-      const endStr = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
-      eventDescription = `${stbyLabel} ${startStr} ~ ${endStr}`;
+      eventDescription = cev.text;
     }
 
     const eventPayload: any = {
