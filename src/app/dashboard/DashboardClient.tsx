@@ -43,8 +43,18 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
 
   const handleParsePreviewDirect = async (cText: string, dText: string) => {
     if (!cText && !dText) {
-      alert("Please paste your schedule text first!");
+      alert("복사한 텍스트를 입력해주세요! (Please paste your schedule text first!)");
       return;
+    }
+
+    if (!cText && dText) {
+      const proceed = window.confirm("⚠️ 1번 창(My Schedule) 입력란이 비어 있습니다!\n\n이대로 진행할 경우 휴무(DO), 대기(STBY), 병가(SICK) 등의 기본 일정이 달력에 동기화되지 않습니다.\n\n계속 파싱을 진행하시겠습니까?");
+      if (!proceed) return;
+    }
+
+    if (cText && !dText) {
+      const proceed = window.confirm("⚠️ 2번 창(Crew Roster Report) 입력란이 비어 있습니다!\n\n이대로 진행할 경우 비행 스케줄의 상세 정보(출도착 시간, 크루 명단, 체류비 등)가 누락된 채 달력에 표기됩니다.\n\n계속 파싱을 진행하시겠습니까?");
+      if (!proceed) return;
     }
     
     setIsParsing(true);
