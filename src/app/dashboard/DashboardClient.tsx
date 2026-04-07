@@ -24,6 +24,7 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
   const [calendars, setCalendars] = useState<{ id: string; summary: string; backgroundColor: string; primary: boolean }[]>([]);
   const [selectedCalendarId, setSelectedCalendarId] = useState("primary");
   const [isFetchingCalendars, setIsFetchingCalendars] = useState(false);
+  const [warningModal, setWarningModal] = useState<{ title: string; message: string; cText: string; dText: string } | null>(null);
 
   useEffect(() => {
     if (initialData && initialData.calendarText) {
@@ -48,15 +49,29 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
     }
 
     if (!cText && dText) {
-      const proceed = window.confirm("⚠️ 1번 창(My Schedule) 입력란이 비어 있습니다!\n\n이대로 진행할 경우 휴무(DO), 대기(STBY), 병가(SICK) 등의 기본 일정이 달력에 동기화되지 않습니다.\n\n계속 파싱을 진행하시겠습니까?");
-      if (!proceed) return;
+      setWarningModal({
+        title: "1번 창 누락 (My Schedule)",
+        message: "이대로 진행할 경우 휴무(DO), 대기(STBY), 병가(SICK) 등 기본 일정이 달력에 전혀 등록되지 않습니다.\n\n계속 파싱을 진행하시겠습니까?",
+        cText,
+        dText
+      });
+      return;
     }
 
     if (cText && !dText) {
-      const proceed = window.confirm("⚠️ 2번 창(Crew Roster Report) 입력란이 비어 있습니다!\n\n이대로 진행할 경우 비행 스케줄의 상세 정보(출도착 시간, 크루 명단, 체류비 등)가 누락된 채 달력에 표기됩니다.\n\n계속 파싱을 진행하시겠습니까?");
-      if (!proceed) return;
+      setWarningModal({
+        title: "2번 창 누락 (Crew Roster Report)",
+        message: "이대로 진행할 경우 비행 스케줄의 상세 정보(출도착 시간, 크루 명단, 체류비 등)가 누락된 채 날짜만 표기됩니다.\n\n계속 파싱을 진행하시겠습니까?",
+        cText,
+        dText
+      });
+      return;
     }
     
+    executeParse(cText, dText);
+  };
+
+  const executeParse = async (cText: string, dText: string) => {
     setIsParsing(true);
     setSuccessMsg("");
 
@@ -536,6 +551,48 @@ export default function DashboardClient({ initialData, isLoggedIn = false }: { i
               })}
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {warningModal && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', padding: '20px' }}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className={`glass-panel`}
+              style={{ width: '100%', maxWidth: '350px', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', padding: '24px' }}
+            >
+              <h3 style={{ margin: '0 0 16px 0', color: '#f87171', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem' }}>
+                <ShieldAlert size={24} /> {warningModal.title}
+              </h3>
+              <div style={{ color: '#e2e8f0', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '24px', whiteSpace: 'pre-wrap' }}>
+                {warningModal.message}
+              </div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button 
+                  onClick={() => setWarningModal(null)}
+                  style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', color: '#e2e8f0', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', flex: 1 }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                >
+                  돌아가기
+                </button>
+                <button 
+                  onClick={() => {
+                    setWarningModal(null);
+                    executeParse(warningModal.cText, warningModal.dText);
+                  }}
+                  style={{ padding: '10px 16px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '8px', color: '#f87171', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', flex: 1 }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+                >
+                  무시하고 진행
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
