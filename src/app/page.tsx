@@ -52,23 +52,6 @@ export default function LandingPage() {
             Continue without Google
           </a>
 
-          <div style={{
-            marginTop: '24px',
-            padding: '16px',
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '8px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            fontSize: '0.85rem',
-            color: '#9ca3af',
-            textAlign: 'left',
-          }}>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-              <ShieldAlert size={16} color="#60a5fa" style={{ flexShrink: 0, marginTop: '2px' }} />
-              <span>
-                <strong style={{ color: '#e5e7eb' }}>Google Verification Notice:</strong> During our app verification process, you may see an "Unverified App" warning. You can safely proceed by clicking <b>Advanced ➡️ Go to KAL FlightSchedule (unsafe)</b>.
-              </span>
-            </div>
-          </div>
         </div>
       </section>
 
