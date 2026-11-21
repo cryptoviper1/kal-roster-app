@@ -101,7 +101,7 @@ export const HOTELS: Record<string, string> = {
   "PRG": "Courtyard by Marriott Prague Airport (Aviaticka 1092/8, Prague, 161 00)",
   "MAD": "Hotel Marriott Auditorium (400 Avda De Aragon 28022 Madrid)",
   "MXP": "Doubletree by Hilton Milan Malpensa Solbiate Olona (Via per Busto Arsizio, 7, 21058 Solbiate Olona VA)",
-  "CDG": "The Atrium Hotel & Conference Centre, Paris CDG Airport by Penta (351 Avenue du Bois de la pie . BP 40048 . Paris Nord Ⅱ. 95912 Roissy CDG Cedex)",
+  "CDG": "VAN DER VALK HOTEL PARIS CDG AIRPORT (351 Avenue du Bois de la Pie, Paris Nord 2, 95912 Roissy-en-France)",
   "LIS": "Holiday Inn Lisbon-Continental (Rua Laura Alves, 9 1069-169 Lisboa)",
   "BCN": "Ilunion Barcelona (Calle Ramon Turró 196/198 08005 Barcelona)",
   "BUD": "Mercure Budapest Korona Hotel (Kecskemeti utca 14 NTAK: SZ19000369, szálloda 1053)",
