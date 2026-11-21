@@ -31,6 +31,14 @@ export function getUtcTime(dtStr: string, airportCode: string): Date | null {
   }
 }
 
+// Ground school / classroom courses (e.g. TSATCCRM, 78OEGINT, KCRM1.0)
+export function isGroundSchoolCode(code: string): boolean {
+  return /^TSATC(CRM|GS|CT)$/.test(code) ||
+    /^(78|32|77|33|38|74|22|35)?OEG(INT|EM|PM|CS)$/.test(code) ||
+    /^OEGASS$/.test(code) ||
+    /^KCRM/.test(code);
+}
+
 function normalizeDetailedText(text: string): string[] {
   const parsedLines: string[] = [];
   for (const line of text.split('\n')) {
@@ -222,11 +230,13 @@ export function parseCalendarSchedule(text: string) {
       } else if (upperLine === 'UNION') {
         events.push({ type: "UNION", day: currentDay, text: "Union" });
       } else {
-        const match = line.match(/([A-Za-z0-9_]+)?[A-Z]{3}\s+(\d{2}:\d{2})\s*-\s*[A-Z]{3}\s+(\d{2}:\d{2})/);
+        // Subject may contain dots (e.g. "KCRM1.0GMP 09:00 - GMP 10:30")
+        const match = line.match(/([A-Za-z0-9_.]+)?([A-Z]{3})\s+(\d{2}:\d{2})\s*-\s*([A-Z]{3})\s+(\d{2}:\d{2})/);
         if (match) {
           const subject = match[1] ? match[1] : "Training";
-          const startTime = match[2];
-          const endTime = match[3];
+          const dep = match[2];
+          const startTime = match[3];
+          const endTime = match[5];
 
           if (!/^KE\d+/.test(subject) && !/^DH\d+/.test(subject)) {
             // Check if this is actually a STBY event (e.g. HM_STBY)
@@ -236,19 +246,31 @@ export function parseCalendarSchedule(text: string) {
                 day: currentDay,
                 text: line,
                 subject,
+                location: dep,
                 start: startTime,
                 end: endTime
               });
             } else {
-              const isGroundSchool = /^TSATC(CRM|GS|CT)$/.test(subject) || /^(78|32|77|33|38|74|22|35)?OEG(INT|EM|PM|CS)$/.test(subject) || /^OEGASS$/.test(subject);
-              events.push({
-                type: isGroundSchool ? "GND" : "TRG",
-                day: currentDay,
-                text: `${subject} ${startTime}~${endTime}`,
-                subject,
-                start: startTime,
-                end: endTime
-              });
+              const isGroundSchool = isGroundSchoolCode(subject);
+              const type = isGroundSchool ? "GND" : "TRG";
+              // Merge consecutive sessions of the same course on the same day into one event
+              const prev: any = events[events.length - 1];
+              if (prev && prev.day === currentDay && prev.subject === subject && prev.type === type) {
+                prev.end = endTime;
+                prev.sessions.push(`${startTime}~${endTime}`);
+                prev.text = `${subject} ${prev.start}~${endTime}`;
+              } else {
+                events.push({
+                  type,
+                  day: currentDay,
+                  text: `${subject} ${startTime}~${endTime}`,
+                  subject,
+                  location: dep,
+                  start: startTime,
+                  end: endTime,
+                  sessions: [`${startTime}~${endTime}`]
+                });
+              }
             }
           }
         } else if (upperLine.includes('SBY')) {
@@ -292,7 +314,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     const fL = r[r.length - 1];
     flightsCount += r.length;
 
-    const isGroundSchool = /^TSATC(CRM|GS|CT)$/.test(f1.flt) || /^(78|32|77|33|38|74|22|35)?OEG(INT|EM|PM|CS)$/.test(f1.flt) || /^OEGASS$/.test(f1.flt);
+    const isGroundSchool = isGroundSchoolCode(f1.flt);
     const isSim = !isGroundSchool && (SIM_KEYWORDS.some(k => f1.flt.toUpperCase().includes(k)) || 
                   (f1.dep === f1.arr) ||
                   /^(78|77|74|73|38|35|33|32)/.test(f1.flt)); // Matches training codes like 787FFS, 33FFS etc.
@@ -565,6 +587,7 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
       startHour = hh_s; startMin = mm_s;
       endHour = hh_e; endMin = mm_e;
       summary = cev.subject;
+      if (cev.location) location = cev.location;
     }
 
     const startUtcTime = Date.UTC(yyyy, mm, day, startHour, startMin) - 9 * 3600000;
@@ -580,6 +603,9 @@ export function generateEvents(sortedFlights: any[], calEvents: any[], isCap: bo
     let eventDescription = `Schedule Type: ${cev.type} parsed from Calendar.`;
     if (cev.type === 'STBY') {
       eventDescription = cev.text;
+    } else if ((cev.type === 'TRG' || cev.type === 'GND') && cev.sessions && cev.sessions.length > 1) {
+      const label = cev.type === 'GND' ? '📚 Ground School' : '🏢 Training';
+      eventDescription = `${cev.subject} ${label}: ${location}\n\nSessions:\n${cev.sessions.map((s: string) => `- ${s}`).join('\n')}`;
     }
 
     const eventPayload: any = {
