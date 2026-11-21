@@ -14,7 +14,18 @@ export const AIRPORT_TZ: Record<string, string> = {
   'SCL': 'America/Santiago', 'LHR': 'Europe/London', 'CDG': 'Europe/Paris', 'FRA': 'Europe/Berlin', 'FCO': 'Europe/Rome', 
   'MXP': 'Europe/Rome', 'AMS': 'Europe/Amsterdam', 'ZRH': 'Europe/Zurich', 'VIE': 'Europe/Vienna', 
   'PRG': 'Europe/Prague', 'BUD': 'Europe/Budapest', 'MAD': 'Europe/Madrid', 'BCN': 'Europe/Madrid',
-  'LIS': 'Europe/Lisbon', 'ZAG': 'Europe/Zagreb', 'VVO': 'Asia/Vladivostok', 'TAS': 'Asia/Tashkent', 'ALA': 'Asia/Almaty'
+  'LIS': 'Europe/Lisbon', 'ZAG': 'Europe/Zagreb', 'VVO': 'Asia/Vladivostok', 'TAS': 'Asia/Tashkent', 'ALA': 'Asia/Almaty',
+  // Korea domestic
+  'TAE': 'Asia/Seoul', 'USN': 'Asia/Seoul', 'KWJ': 'Asia/Seoul', 'RSU': 'Asia/Seoul', 'KUV': 'Asia/Seoul', 'WJU': 'Asia/Seoul', 'YNY': 'Asia/Seoul',
+  // Asia
+  'KMG': 'Asia/Shanghai', 'MFM': 'Asia/Macau', 'UBN': 'Asia/Ulaanbaatar', 'CNX': 'Asia/Bangkok', 'HKT': 'Asia/Bangkok',
+  'PEN': 'Asia/Kuala_Lumpur', 'DAD': 'Asia/Ho_Chi_Minh', 'CXR': 'Asia/Ho_Chi_Minh', 'PQC': 'Asia/Ho_Chi_Minh',
+  'KTI': 'Asia/Phnom_Penh', 'CEB': 'Asia/Manila', 'KTM': 'Asia/Kathmandu',
+  // Middle East / Caucasus
+  'TLV': 'Asia/Jerusalem', 'TBS': 'Asia/Tbilisi', 'EVN': 'Asia/Yerevan',
+  // Europe
+  'ATH': 'Europe/Athens', 'DBV': 'Europe/Zagreb', 'OSL': 'Europe/Oslo', 'ARN': 'Europe/Stockholm',
+  'MRS': 'Europe/Paris', 'VCE': 'Europe/Rome'
 };
 
 export const KOREA_PORTS = ['ICN', 'GMP', 'PUS', 'CJU', 'TAE', 'KWJ', 'RSU', 'USN', 'KUV', 'WJU', 'YNY'];
@@ -104,5 +115,10 @@ export const HOTELS: Record<string, string> = {
   "BNE": "Grand Chancellor Brisbane (23 Leichhardt st (Cnr Wickham Terrace) Brisbane)",
   "SYD": "Rydges World Square Sydney (389 Pitt Street, Sydney, NSW, 2000)",
   "SCL": "InterContinental Santiago Hotel (Av Vitacura 2885, Las Condes, Region Metropolitana, Chile)",
-  "TAS": "Lotte City Hotel Tashkent Palace (56 Buyuk Turon Street, Tashkent, Uzbekistan)"
+  "TAS": "Lotte City Hotel Tashkent Palace (56 Buyuk Turon Street, Tashkent, Uzbekistan)",
+  "MRS": "Hilton Garden Inn Marseille Provence Airport (Aéroport Marseille Provence - BP 50, 13700 Marignane)",
+  "ARN": "Courtyard by Marriott Stockholm Kungsholmen (Rålambshovsleden 50, 112 19 Stockholm)",
+  "VCE": "Four Points by Sheraton Venice Mestre Hotel (Via Don Luigi Peron 4, 30174 Mestre)",
+  "TBS": "Radisson Blu Iveria Hotel Tbilisi (1 Republic Square, Tbilisi 0108)",
+  "EVN": "DoubleTree by Hilton Yerevan (4/2 Surb Grigor Lusavorich Street, Yerevan 0015)"
 };
