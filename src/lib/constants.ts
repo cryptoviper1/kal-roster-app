@@ -16,7 +16,7 @@ export const AIRPORT_TZ: Record<string, string> = {
   'PRG': 'Europe/Prague', 'BUD': 'Europe/Budapest', 'MAD': 'Europe/Madrid', 'BCN': 'Europe/Madrid',
   'LIS': 'Europe/Lisbon', 'ZAG': 'Europe/Zagreb', 'VVO': 'Asia/Vladivostok', 'TAS': 'Asia/Tashkent', 'ALA': 'Asia/Almaty',
   // Korea domestic
-  'TAE': 'Asia/Seoul', 'USN': 'Asia/Seoul', 'KWJ': 'Asia/Seoul', 'RSU': 'Asia/Seoul', 'KUV': 'Asia/Seoul', 'WJU': 'Asia/Seoul', 'YNY': 'Asia/Seoul',
+  'TAE': 'Asia/Seoul', 'USN': 'Asia/Seoul', 'CJJ': 'Asia/Seoul', 'KWJ': 'Asia/Seoul', 'RSU': 'Asia/Seoul', 'KUV': 'Asia/Seoul', 'WJU': 'Asia/Seoul', 'YNY': 'Asia/Seoul',
   // Asia
   'KMG': 'Asia/Shanghai', 'MFM': 'Asia/Macau', 'UBN': 'Asia/Ulaanbaatar', 'CNX': 'Asia/Bangkok', 'HKT': 'Asia/Bangkok',
   'PEN': 'Asia/Kuala_Lumpur', 'DAD': 'Asia/Ho_Chi_Minh', 'CXR': 'Asia/Ho_Chi_Minh', 'PQC': 'Asia/Ho_Chi_Minh',
@@ -28,7 +28,7 @@ export const AIRPORT_TZ: Record<string, string> = {
   'MRS': 'Europe/Paris', 'VCE': 'Europe/Rome'
 };
 
-export const KOREA_PORTS = ['ICN', 'GMP', 'PUS', 'CJU', 'TAE', 'KWJ', 'RSU', 'USN', 'KUV', 'WJU', 'YNY'];
+export const KOREA_PORTS = ['ICN', 'GMP', 'PUS', 'CJU', 'TAE', 'CJJ', 'KWJ', 'RSU', 'USN', 'KUV', 'WJU', 'YNY'];
 
 export const PER_DIEM_RATES: Record<string, number> = {
   "SFO": 4.21, "LAX": 4.01, "LAS": 4.01, "ANC": 3.81, "SEA": 3.81, "ATL": 3.61, "BOS": 3.61, "JFK": 3.61, "ORD": 3.41, "HNL": 3.41,
@@ -120,5 +120,7 @@ export const HOTELS: Record<string, string> = {
   "ARN": "Courtyard by Marriott Stockholm Kungsholmen (Rålambshovsleden 50, 112 19 Stockholm)",
   "VCE": "Four Points by Sheraton Venice Mestre Hotel (Via Don Luigi Peron 4, 30174 Mestre)",
   "TBS": "Radisson Blu Iveria Hotel Tbilisi (1 Republic Square, Tbilisi 0108)",
-  "EVN": "DoubleTree by Hilton Yerevan (4/2 Surb Grigor Lusavorich Street, Yerevan 0015)"
+  "EVN": "DoubleTree by Hilton Yerevan (4/2 Surb Grigor Lusavorich Street, Yerevan 0015)",
+  "CJJ": "글로스터 호텔 청주 (충북 청주시 흥덕구 대농로 47-2)",
+  "FCO": "Hilton Rome Airport (Via Arturo Ferrarin 2, 00050 Fiumicino, Italia)"
 };
